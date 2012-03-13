@@ -20,4 +20,5 @@
 # Install git
 include_recipe "git"
 
-
+# Install gitolite
+include_recipe "gitolite"
