@@ -22,3 +22,26 @@ include_recipe "git"
 
 # Install gitolite
 include_recipe "gitolite"
+
+# Create gitlab user
+user node['gitlab']['gitlab_user_name'] do
+  comment node['gitlab']['gitlab_user_comment']
+  home node['gitlab']['gitlab_user_home_dir']
+  shell node['gitlab']['gitlab_user_default_shell']
+  password node['gitlab']['gitlab_user_password']
+end
+
+# Create user gitlab's home directory
+directory node['gitlab']['gitlab_user_home_dir'] do
+  owner node['gitlab']['gitlab_user_name']
+  group node['gitlab']['gitlab_user_group_name']
+  mode node['gitlab']['gitlab_user_mode']
+end
+
+# Add user gitlab to ['gitolite']['git_user_group_name']
+git_user = node['gitolite']['git_user_name']
+gitlab_user = node['gitlab']['gitlab_user_name']
+
+group node['gitolite']['git_user_group_name'] do
+  members ["#{git_user}","#{gitlab_user}"]
+end
