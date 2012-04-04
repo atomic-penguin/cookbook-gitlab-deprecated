@@ -45,3 +45,61 @@ gitlab_user = node['gitlab']['gitlab_user_name']
 group node['gitolite']['git_user_group_name'] do
   members ["#{git_user}","#{gitlab_user}"]
 end
+
+# Generate ssh key pair for gitlab user
+execute "generate-ssh-keypairs" do
+  command "mkdir #{node['gitlab']['gitlab_user_home_dir']}/.ssh;
+           ssh-keygen -q -f #{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa -N \"\";
+           chown -R #{node['gitlab']['gitlab_user_name']}:#{node['gitlab']['gitlab_user_group_name']} #{node['gitlab']['gitlab_user_home_dir']}/.ssh"
+  user node['gitlab']['gitlab_user_name']
+  group node['gitlab']['gitlab_user_group_name']
+  cwd node['gitlab']['gitlab_user_home_dir']
+  action :run
+  not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub"}
+end
+
+# Copy public key to  authorized_keys
+execute "cp_gitlab_public_key_to_authorized_keys" do 
+  command "cp #{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub #{node['gitlab']['gitlab_user_home_dir']}/.ssh/authorized_keys"
+  user node['gitlab']['gitlab_user_name']
+  group node['gitlab']['gitlab_user_group_name']
+  cwd node['gitlab']['gitlab_user_home_dir']
+  action :run
+  not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/authorized_keys"}
+end
+
+# Copy user gitlab's public key to /home/git
+execute "cp_gitlab_public_key " do
+  command "cp #{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
+           chmod 777 #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
+           chown #{node['gitolite']['git_user_name']}:#{node['gitolite']['git_user_group_name']} #{node['gitolite']['git_user_home_dir']}/gitlab.pub"
+  user node['gitolite']['gitolite_user_name']
+  group node['gitolite']['gitolite_user_group_name']
+  cwd node['gitolite']['gitolite_user_home_dir']
+  action :run
+  not_if {File.exist? "#{node['gitolite']['git_user_home_dir']}/gitlab.pub"}
+  not_if "stat -c %a #{node['gitolite']['git_user_home_dir']}/gitlab.pub |grep 777"
+end
+
+# Set permissions to 777 on /home/git/gitlab.pub
+#execute "set_perms_on_gitlab.pub" do
+#  command "chmod 777 #{node['gitolite']['git_user_home_dir']}/gitlab.pub"
+#  not_if "stat -c %a /home/git/gitlab.pub |grep 777"
+#end  
+
+# Execute sed search & replace
+execute "sed_search_and_replace" do
+  command "sed -i 's/0077/0007/g' /home/git/share/gitolite/conf/example.gitolite.rc"
+  user node['gitolite']['git_user_name']
+  not_if "cat /home/git/share/gitolite/conf/example.gitolite.rc |grep 0007"
+end  
+
+script "add_dir_to_path" do
+  #not_if "echo $PATH |grep #{node['gitolite']['git_user_home_dir']/bin}"
+  interpreter "bash"
+  user node['gitolite']['git_user_name']
+  cwd node['gitolite']['git_user_home_dir']
+  code <<-EOH
+  PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub
+  EOH
+end
