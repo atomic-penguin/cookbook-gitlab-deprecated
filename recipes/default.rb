@@ -72,7 +72,8 @@ end
 execute "cp_gitlab_public_key " do
   command "cp #{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
            chmod 777 #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
-           chown #{node['gitolite']['git_user_name']}:#{node['gitolite']['git_user_group_name']} #{node['gitolite']['git_user_home_dir']}/gitlab.pub"
+           chown #{node['gitolite']['git_user_name']}:#{node['gitolite']['git_user_group_name']} #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
+           gl-setup -q /home/git/gitlab.pub"
   user node['gitolite']['gitolite_user_name']
   group node['gitolite']['gitolite_user_group_name']
   cwd node['gitolite']['gitolite_user_home_dir']
@@ -81,25 +82,10 @@ execute "cp_gitlab_public_key " do
   not_if "stat -c %a #{node['gitolite']['git_user_home_dir']}/gitlab.pub |grep 777"
 end
 
-# Set permissions to 777 on /home/git/gitlab.pub
-#execute "set_perms_on_gitlab.pub" do
-#  command "chmod 777 #{node['gitolite']['git_user_home_dir']}/gitlab.pub"
-#  not_if "stat -c %a /home/git/gitlab.pub |grep 777"
-#end  
-
-# Execute sed search & replace
-execute "sed_search_and_replace" do
-  command "sed -i 's/0077/0007/g' /home/git/share/gitolite/conf/example.gitolite.rc"
-  user node['gitolite']['git_user_name']
-  not_if "cat /home/git/share/gitolite/conf/example.gitolite.rc |grep 0007"
-end  
-
-script "add_dir_to_path" do
-  #not_if "echo $PATH |grep #{node['gitolite']['git_user_home_dir']/bin}"
-  interpreter "bash"
-  user node['gitolite']['git_user_name']
-  cwd node['gitolite']['git_user_home_dir']
-  code <<-EOH
-  PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub
-  EOH
+directory node['gitolite']['git_user_home_dir'] do
+  owner node['gitolite']['git_user_name']
+  group node['gitolite']['git_user_group_name']
+  mode "0775"
 end
+
+
