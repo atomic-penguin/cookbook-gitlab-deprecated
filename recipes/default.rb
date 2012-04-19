@@ -73,7 +73,7 @@ execute "cp_gitlab_public_key " do
   command "cp #{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
            chmod 777 #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
            chown #{node['gitolite']['git_user_name']}:#{node['gitolite']['git_user_group_name']} #{node['gitolite']['git_user_home_dir']}/gitlab.pub;
-           gl-setup -q /home/git/gitlab.pub"
+           gitolite setup -pk /home/git/gitlab.pub"
   user node['gitolite']['gitolite_user_name']
   group node['gitolite']['gitolite_user_group_name']
   cwd node['gitolite']['gitolite_user_home_dir']
