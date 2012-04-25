@@ -55,7 +55,7 @@ execute "generate-ssh-keypairs" do
   group node['gitlab']['gitlab_user_group_name']
   cwd node['gitlab']['gitlab_user_home_dir']
   action :run
-  not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub"}
+  #not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/id_rsa.pub"}
 end
 
 # Copy public key to  authorized_keys
@@ -65,7 +65,7 @@ execute "cp_gitlab_public_key_to_authorized_keys" do
   group node['gitlab']['gitlab_user_group_name']
   cwd node['gitlab']['gitlab_user_home_dir']
   action :run
-  not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/authorized_keys"}
+  #not_if {File.exist? "#{node['gitlab']['gitlab_user_home_dir']}/.ssh/authorized_keys"}
 end
 
 # Copy user gitlab's public key to /home/git
@@ -78,8 +78,8 @@ execute "cp_gitlab_public_key " do
   group node['gitolite']['gitolite_user_group_name']
   cwd node['gitolite']['gitolite_user_home_dir']
   action :run
-  not_if {File.exist? "#{node['gitolite']['git_user_home_dir']}/gitlab.pub"}
-  not_if "stat -c %a #{node['gitolite']['git_user_home_dir']}/gitlab.pub |grep 777"
+  #not_if {File.exist? "#{node['gitolite']['git_user_home_dir']}/gitlab.pub"}
+  #not_if "stat -c %a #{node['gitolite']['git_user_home_dir']}/gitlab.pub |grep 777"
 end
 
 directory node['gitolite']['git_user_home_dir'] do
@@ -87,5 +87,3 @@ directory node['gitolite']['git_user_home_dir'] do
   group node['gitolite']['git_user_group_name']
   mode "0775"
 end
-
-
