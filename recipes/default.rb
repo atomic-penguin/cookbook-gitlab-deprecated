@@ -22,3 +22,31 @@ include_recipe "git"
 
 # Install gitolite
 include_recipe "gitolite"
+
+# Install sqlite
+include_recipe "sqlite"
+
+# Install Redis
+include_recipe "redisio::install"
+
+# Enable the redis service
+include_recipe "redisio::enable"
+
+# Install required packages for Gitlab
+case node[:platform]
+  when "ubuntu","debian","linuxmint"
+    %w{  wget curl gcc checkinstall libxml2-dev libxslt-dev libsqlite3-dev
+         libcurl4-openssl-dev libreadline-dev libc6-dev libssl-dev libmysql++-dev
+         make build-essential zlib1g-dev libicu-dev openssh-server
+         python-dev python-pip libyaml-dev sendmail sudo }.each do |pkg|
+         package pkg
+  end
+
+  when "redhat","centos","amazon","arch"
+    %w{ curl sudo wget gcc libxml2-devel libxslt-devel sqlite-devel readline-devel
+        libxslt-devel openssl-devel mysql++-devel make gcc-c++ kernel-devel zlib-devel
+        libicu-devel openssh-server python-devel python-pip libyaml-devel
+        sendmail }.each do |pkg|
+        package pkg
+  end
+end
