@@ -18,3 +18,6 @@ default['gitlab']['gitlab_user_comment'] = "Gitlab User"
 default['gitlab']['gitlab_user_home_dir'] = "/home/gitlab"
 default['gitlab']['gitlab_user_default_shell'] = "/bin/bash"
 default['gitlab']['gitlab_user_password'] = ""
+
+# Set github URL for gitlab
+default['gitlab']['repository_url'] = "git://github.com/gitlabhq/gitlabhq.git"

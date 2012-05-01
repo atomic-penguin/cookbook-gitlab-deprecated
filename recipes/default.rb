@@ -50,3 +50,51 @@ case node[:platform]
         package pkg
   end
 end
+
+# Install required Ruby Gems for Gitlab
+%w{ charlock_holmes bundler }.each do |pkg|
+  gem_package pkg do
+  action :install
+  ignore_failure true
+  end
+end
+
+# Clone Gitlab repo from github
+git "#{node['gitlab']['gitlab_user_home_dir']}/gitlab" do
+  repository node['gitlab']['repository_url']
+  reference "master"
+  action :sync
+  user node['gitlab']['gitlab_user_name']
+  group node['gitlab']['gitlab_user_group_name']
+  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+end
+
+# Rename config file to gitlab.yml
+execute "rename-gitlab.yml" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml.example #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root" 
+  group "root"
+  action :run
+  not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml"
+end
+
+# Rename config file to database.yml
+execute "rename-.yml" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml.example #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root"
+  group "root"
+  action :run
+  not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml"
+end
+
+# Install Gems with bundle install
+#execute "rename-database.yml" do
+#  command "su - #{node['gitlab']['gitlab_user_name']} -c \"bundle install --without development test --deployment\""
+#  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+#  user "root"
+#  group "root"
+#  action :run
+  #not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml"
+#end
