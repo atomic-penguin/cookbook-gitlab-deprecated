@@ -112,3 +112,29 @@ execute "gitlab-bundle-exec-rake" do
   only_if "test -d /opt/opscode/embedded/bin"
   not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab/db"
 end
+
+# Start Gitlab Rails app
+execute "start-gitlab-rails-app" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+           bundle exec rails s -e production -d\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root"
+  group "root"
+  action :run
+  only_if "test -d /opt/opscode/embedded/bin"
+  not_if "ps aux |grep gitlab |grep 'rails s -e production' |egrep -v grep"
+end
+
+# Start Resque for queue processing
+execute "start-resque-for-queue-processing" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+           ./resque.sh &\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root"
+  group "root"
+  action :run
+  only_if "test -d /opt/opscode/embedded/bin"
+  not_if "ps aux |grep resque |egrep -v grep"
+end
