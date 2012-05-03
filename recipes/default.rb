@@ -60,65 +60,65 @@ end
 end
 
 # Clone Gitlab repo from github
-git "#{node['gitlab']['gitlab_user_home_dir']}/gitlab" do
+git "#{node['gitlab']['gitlab_home']}/gitlab" do
   repository node['gitlab']['repository_url']
   reference "master"
   action :sync
-  user node['gitlab']['gitlab_user_name']
-  group node['gitlab']['gitlab_user_group_name']
-  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user node['gitlab']['gitlab_user']
+  group node['gitlab']['gitlab_group']
+  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab"
 end
 
 # Rename config file to gitlab.yml
 execute "rename-gitlab.yml" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml.example #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  command "su - #{node['gitlab']['gitlab_user']} -c \"cp #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml.example #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml\""
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root" 
   group "root"
   action :run
-  not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml"
+  not_if "test -f #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml"
 end
 
 # Rename config file to database.yml
 execute "rename-database.yml" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml.sqlite #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  command "su - #{node['gitlab']['gitlab_user']} -c \"cp #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml.sqlite #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml\""
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root"
   group "root"
   action :run
-  not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml"
+  not_if "test -f #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml"
 end
 
 # Install Gems with bundle install
 execute "gitlab-bundle-install" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab; /opt/opscode/embedded/bin/bundle install --without development test --deployment\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  command "su - #{node['gitlab']['gitlab_user']} -c \"cd #{node['gitlab']['gitlab_home']}/gitlab; /opt/opscode/embedded/bin/bundle install --without development test --deployment\""
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root"
   group "root"
   action :run
   only_if "test -d /opt/opscode/embedded/bin"
-  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab/db"
+  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab/db"
 end
 
 # Setup database for Gitlab
 execute "gitlab-bundle-exec-rake" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_home']}/gitlab;
            /opt/opscode/embedded/bin/bundle exec rake gitlab:app:setup RAILS_ENV=production\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root"
   group "root"
   action :run
   only_if "test -d /opt/opscode/embedded/bin"
-  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab/db"
+  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab/db"
 end
 
 # Start Gitlab Rails app
 execute "start-gitlab-rails-app" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_home']}/gitlab;
            bundle exec rails s -e production -d\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root"
   group "root"
   action :run
@@ -128,10 +128,10 @@ end
 
 # Start Resque for queue processing
 execute "start-resque-for-queue-processing" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_home']}/gitlab;
            ./resque.sh &\""
-  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
   user "root"
   group "root"
   action :run

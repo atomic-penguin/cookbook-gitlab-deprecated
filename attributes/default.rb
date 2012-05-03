@@ -12,12 +12,9 @@
 # limitations under the License.
 
 # Set attributes for the git user
-default['gitlab']['gitlab_user_name'] = "gitlab"
-default['gitlab']['gitlab_user_group_name'] = "gitlab"
-default['gitlab']['gitlab_user_comment'] = "Gitlab User"
-default['gitlab']['gitlab_user_home_dir'] = "/home/gitlab"
-default['gitlab']['gitlab_user_default_shell'] = "/bin/bash"
-default['gitlab']['gitlab_user_password'] = ""
+default['gitlab']['gitlab_user'] = "gitlab"
+default['gitlab']['gitlab_group'] = "gitlab"
+default['gitlab']['gitlab_home'] = "/home/gitlab"
 
 # Set github URL for gitlab
 default['gitlab']['repository_url'] = "git://github.com/gitlabhq/gitlabhq.git"
