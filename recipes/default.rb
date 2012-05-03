@@ -80,8 +80,8 @@ execute "rename-gitlab.yml" do
 end
 
 # Rename config file to database.yml
-execute "rename-.yml" do
-  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml.example #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml\""
+execute "rename-database.yml" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cp #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml.sqlite #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/database.yml\""
   cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
   user "root"
   group "root"
@@ -90,11 +90,25 @@ execute "rename-.yml" do
 end
 
 # Install Gems with bundle install
-#execute "rename-database.yml" do
-#  command "su - #{node['gitlab']['gitlab_user_name']} -c \"bundle install --without development test --deployment\""
-#  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
-#  user "root"
-#  group "root"
-#  action :run
-  #not_if "test -f #{node['gitlab']['gitlab_user_home_dir']}/gitlab/config/gitlab.yml"
-#end
+execute "gitlab-bundle-install" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab; /opt/opscode/embedded/bin/bundle install --without development test --deployment\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root"
+  group "root"
+  action :run
+  only_if "test -d /opt/opscode/embedded/bin"
+  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab/db"
+end
+
+# Setup database for Gitlab
+execute "gitlab-bundle-exec-rake" do
+  command "su - #{node['gitlab']['gitlab_user_name']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
+           cd #{node['gitlab']['gitlab_user_home_dir']}/gitlab;
+           /opt/opscode/embedded/bin/bundle exec rake gitlab:app:setup RAILS_ENV=production\""
+  cwd "#{node['gitlab']['gitlab_user_home_dir']}/gitlab"
+  user "root"
+  group "root"
+  action :run
+  only_if "test -d /opt/opscode/embedded/bin"
+  not_if "test -d #{node['gitlab']['gitlab_user_home_dir']}/gitlab/db"
+end
