@@ -17,38 +17,14 @@
 # limitations under the License.
 #
 
-# Install git
-include_recipe "git"
-
-# Install gitolite
-include_recipe "gitolite"
-
-# Install sqlite
-include_recipe "sqlite"
-
-# Install Redis
-include_recipe "redisio::install"
-
-# Enable the redis service
-include_recipe "redisio::enable"
+# Include cookbook dependencies
+%w{ git gitolite sqlite redisio::install redisio::enable build-essential readline sudo openssh xml zlib }.each do |cb_include|
+  include_recipe cb_include
+end
 
 # Install required packages for Gitlab
-case node[:platform]
-  when "ubuntu","debian","linuxmint"
-    %w{  wget curl gcc checkinstall libxml2-dev libxslt-dev libsqlite3-dev
-         libcurl4-openssl-dev libreadline-dev libc6-dev libssl-dev libmysql++-dev
-         make build-essential zlib1g-dev libicu-dev openssh-server
-         python-dev python-pip libyaml-dev sendmail sudo }.each do |pkg|
-         package pkg
-  end
-
-  when "redhat","centos","amazon","arch"
-    %w{ curl sudo wget gcc libxml2-devel libxslt-devel sqlite-devel readline-devel
-        libxslt-devel openssl-devel mysql++-devel make gcc-c++ kernel-devel zlib-devel
-        libicu-devel openssh-server python-devel python-pip libyaml-devel
-        sendmail }.each do |pkg|
-        package pkg
-  end
+node['gitlab']['packages'].each do |gitlab_pkg|
+  package gitlab_pkg
 end
 
 # Install required Ruby Gems for Gitlab
