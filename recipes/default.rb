@@ -28,41 +28,108 @@ node['gitlab']['packages'].each do |gitlab_pkg|
 end
 
 # Install required Ruby Gems for Gitlab
-%w{ charlock_holmes bundler }.each do |pkg|
+%w{ charlock_holmes bundler sshkey }.each do |pkg|
   gem_package pkg do
-  action :install
-  ignore_failure true
+    action :install
+    ignore_failure true
   end
 end
 
+# Add the gitlab user
+user node['gitlab']['user'] do
+  comment "Gitlab User"
+  home node['gitlab']['home']
+  shell "/bin/bash"
+  supports :manage_home => true
+end
+
+# Add the gitlab user to the "gitolite" group
+group node['gitolite']['security_group'] do
+  members node['gitlab']['user']
+end
+
+# Create a $HOME/.ssh folder
+directory "#{node['gitlab']['home']}/.ssh" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 0700
+end
+
+# Generate and deploy ssh public/private keys
+Gem.clear_paths
+require 'sshkey'
+gitlab_sshkey = SSHKey.generate(:type => 'RSA', :bits => 1024, :comment => "#{node['gitlab']['user']}@#{node['fqdn']}")
+node.set_unless['gitlab']['public_key'] = gitlab_sshkey.ssh_public_key
+
+# Save public_key to node, unless it is already set.
+unless Chef::Config[:solo]
+  ruby_block "save node data" do
+    block do
+      node.save
+    end
+    action :create
+  end
+end
+
+# Render private key template
+template "#{node['gitlab']['home']}/.ssh/id_rsa" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  variables(
+    :private_key => gitlab_sshkey.private_key
+  )
+  mode 0600
+  not_if { File.exists?("#{node['gitlab']['home']}/.ssh/id_rsa") }
+end
+
+# Render public key template for gitlab user
+template "#{node['gitlab']['home']}/.ssh/id_rsa.pub" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 0644
+end
+
+# Render public key template for gitolite user
+template "#{node['gitolite']['git_home']}/gitlab.pub" do
+  owner node['gitolite']['admin_name']
+  group node['gitolite']['security_group']
+  mode 0644
+end
+
+# Sorry for this, it seems maybe something is wrong with the 'gitolite setup' script.
+# This was implemented as a workaround.
+execute "install-gitolite-admin-key" do
+  command "su - #{node['gitolite']['admin_name']} -c 'perl #{node['gitolite']['gitolite_home']}/src/gitolite setup -pk #{node['gitolite']['git_home']}/gitlab.pub'"
+  user "root"
+  cwd node['gitolite']['gitolite_home']
+  not_if { grep -q "'#{node['gitlab']['user']}' #{node['gitolite']['gitolite_home']}/.ssh/authorized_keys" }
+end
+
 # Clone Gitlab repo from github
-git "#{node['gitlab']['gitlab_home']}/gitlab" do
+git node['gitlab']['gitlab_home'] do
   repository node['gitlab']['repository_url']
   reference "master"
-  action :sync
-  user node['gitlab']['gitlab_user']
-  group node['gitlab']['gitlab_group']
-  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab"
+  action :checkout
+  user node['gitlab']['user']
+  group node['gitlab']['group']
 end
 
-# Rename config file to gitlab.yml
-execute "rename-gitlab.yml" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"cp #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml.example #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root" 
-  group "root"
-  action :run
-  not_if "test -f #{node['gitlab']['gitlab_home']}/gitlab/config/gitlab.yml"
+# Link example config file to gitlab.yml
+link "#{node['gitlab']['home']}/config/gitlab.yml" do
+  to "#{node['gitlab']['home']}/config/gitlab.yml.example"
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  link_type :hard
+  not_if { File.exists?("#{node['gitlab']['home']}/config/gitlab.yml") }
 end
 
-# Rename config file to database.yml
-execute "rename-database.yml" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"cp #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml.sqlite #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root"
-  group "root"
-  action :run
-  not_if "test -f #{node['gitlab']['gitlab_home']}/gitlab/config/database.yml"
+# Link example config file to database.yml
+link "#{node['gitlab']['home']}/config/database.yml" do
+  to "#{node['gitlab']['home']}/config/database.yml.sqlite"
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  link_type :hard
+  not_if { File.exists?("#{node['gitlab']['home']}/config/database.yml") }
 end
 
 # Install Gems with bundle install
