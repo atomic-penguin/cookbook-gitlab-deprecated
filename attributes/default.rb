@@ -24,7 +24,7 @@ default['gitlab']['repository_url'] = "git://github.com/gitlabhq/gitlabhq.git"
 # Required packages for Gitlab
 case node['platform']
 when "ubuntu","debian","linuxmint"
-  default['gitlab']['packages'] = %w[ curl wget checkinstall libxslt-dev libsqlite3-dev libcurl4-openssl-dev libssl-dev libmysql++-dev libicu-dev libc6-dev python-dev python-pip libyaml-dev ]
+  default['gitlab']['packages'] = %w[ curl wget checkinstall libxslt-dev libsqlite3-dev libcurl4-openssl-dev libssl-dev libmysql++-dev libicu-dev libc6-dev libyaml-dev ]
 when "redhat","centos","amazon","scientific"
-  default['gitlab']['packages'] = %w[ curl wget libxslt-devel sqlite-devel openssl-devel mysql++-devel libicu-devel glibc-devel python-devel python-pip libyaml-devel ]
+  default['gitlab']['packages'] = %w[ curl wget libxslt-devel sqlite-devel openssl-devel mysql++-devel libicu-devel glibc-devel libyaml-devel ]
 end

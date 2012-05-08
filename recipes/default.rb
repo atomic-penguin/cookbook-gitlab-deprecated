@@ -18,7 +18,7 @@
 #
 
 # Include cookbook dependencies
-%w{ git gitolite sqlite redisio::install redisio::enable build-essential readline sudo openssh xml zlib }.each do |cb_include|
+%w{ git gitolite sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
   include_recipe cb_include
 end
 
@@ -33,6 +33,11 @@ end
     action :install
     ignore_failure true
   end
+end
+
+# Install pygments from pip
+python_pip "pygments" do
+  action :install
 end
 
 # Add the gitlab user
@@ -91,6 +96,7 @@ end
 
 # Render public key template for gitolite user
 template "#{node['gitolite']['git_home']}/gitlab.pub" do
+  source "id_rsa.pub.erb"
   owner node['gitolite']['admin_name']
   group node['gitolite']['security_group']
   mode 0644
@@ -102,11 +108,11 @@ execute "install-gitolite-admin-key" do
   command "su - #{node['gitolite']['admin_name']} -c 'perl #{node['gitolite']['gitolite_home']}/src/gitolite setup -pk #{node['gitolite']['git_home']}/gitlab.pub'"
   user "root"
   cwd node['gitolite']['gitolite_home']
-  not_if { grep -q "'#{node['gitlab']['user']}' #{node['gitolite']['gitolite_home']}/.ssh/authorized_keys" }
+  not_if { "grep -q #{node['gitlab']['user']} #{node['gitolite']['gitolite_home']}/.ssh/authorized_keys" }
 end
 
 # Clone Gitlab repo from github
-git node['gitlab']['gitlab_home'] do
+git "#{node['gitlab']['home']}/app" do
   repository node['gitlab']['repository_url']
   reference "master"
   action :checkout
@@ -115,69 +121,35 @@ git node['gitlab']['gitlab_home'] do
 end
 
 # Link example config file to gitlab.yml
-link "#{node['gitlab']['home']}/config/gitlab.yml" do
-  to "#{node['gitlab']['home']}/config/gitlab.yml.example"
+link "#{node['gitlab']['home']}/app/config/gitlab.yml" do
+  to "#{node['gitlab']['home']}/app/config/gitlab.yml.example"
   owner node['gitlab']['user']
   group node['gitlab']['group']
   link_type :hard
-  not_if { File.exists?("#{node['gitlab']['home']}/config/gitlab.yml") }
+  not_if { File.exists?("#{node['gitlab']['home']}/app/config/gitlab.yml") }
 end
 
 # Link example config file to database.yml
-link "#{node['gitlab']['home']}/config/database.yml" do
-  to "#{node['gitlab']['home']}/config/database.yml.sqlite"
+link "#{node['gitlab']['home']}/app/config/database.yml" do
+  to "#{node['gitlab']['home']}/app/config/database.yml.sqlite"
   owner node['gitlab']['user']
   group node['gitlab']['group']
   link_type :hard
-  not_if { File.exists?("#{node['gitlab']['home']}/config/database.yml") }
+  not_if { File.exists?("#{node['gitlab']['home']}/app/config/database.yml") }
 end
 
 # Install Gems with bundle install
-execute "gitlab-bundle-install" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"cd #{node['gitlab']['gitlab_home']}/gitlab; /opt/opscode/embedded/bin/bundle install --without development test --deployment\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root"
-  group "root"
-  action :run
-  only_if "test -d /opt/opscode/embedded/bin"
-  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab/db"
+execute "gitlab-bundle" do
+  command "bundle install --without development test --deployment"
+  cwd "#{node['gitlab']['gitlab_home']}/app"
+  user node['gitlab']['user'] 
+  not_if "test -d #{node['gitlab']['home']}/db"
 end
 
 # Setup database for Gitlab
-execute "gitlab-bundle-exec-rake" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_home']}/gitlab;
-           /opt/opscode/embedded/bin/bundle exec rake gitlab:app:setup RAILS_ENV=production\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root"
-  group "root"
-  action :run
-  only_if "test -d /opt/opscode/embedded/bin"
-  not_if "test -d #{node['gitlab']['gitlab_home']}/gitlab/db"
-end
-
-# Start Gitlab Rails app
-execute "start-gitlab-rails-app" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_home']}/gitlab;
-           bundle exec rails s -e production -d\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root"
-  group "root"
-  action :run
-  only_if "test -d /opt/opscode/embedded/bin"
-  not_if "ps aux |grep gitlab |grep 'rails s -e production' |egrep -v grep"
-end
-
-# Start Resque for queue processing
-execute "start-resque-for-queue-processing" do
-  command "su - #{node['gitlab']['gitlab_user']} -c \"PATH=$PATH:/opt/opscode/embedded/bin;
-           cd #{node['gitlab']['gitlab_home']}/gitlab;
-           ./resque.sh &\""
-  cwd "#{node['gitlab']['gitlab_home']}/gitlab"
-  user "root"
-  group "root"
-  action :run
-  only_if "test -d /opt/opscode/embedded/bin"
-  not_if "ps aux |grep resque |egrep -v grep"
+execute "gitlab-bundle-rake" do
+  command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
+  cwd "#{node['gitlab']['home']}/app"
+  user node['gitlab']['user'] 
+  not_if "test -d #{node['gitlab']['home']}/app/db"
 end
