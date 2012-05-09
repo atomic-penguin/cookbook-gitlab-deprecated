@@ -18,11 +18,9 @@
 #
 
 # Include cookbook dependencies
-%w{ git sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
+%w{ gitlab::gitolite sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
   include_recipe cb_include
 end
-
-include_recipe "gitlab::gitolite"
 
 # Install required packages for Gitlab
 node['gitlab']['packages'].each do |gitlab_pkg|
@@ -64,7 +62,7 @@ end
 # Generate and deploy ssh public/private keys
 Gem.clear_paths
 require 'sshkey'
-gitlab_sshkey = SSHKey.generate(:type => 'RSA', :bits => 1024, :comment => "#{node['gitlab']['user']}@#{node['fqdn']}")
+gitlab_sshkey = SSHKey.generate(:type => 'RSA', :comment => "#{node['gitlab']['user']}@#{node['fqdn']}")
 node.set_unless['gitlab']['public_key'] = gitlab_sshkey.ssh_public_key
 
 # Save public_key to node, unless it is already set.
