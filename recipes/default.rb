@@ -18,9 +18,11 @@
 #
 
 # Include cookbook dependencies
-%w{ git gitolite sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
+%w{ git sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
   include_recipe cb_include
 end
+
+include_recipe "gitlab::gitolite"
 
 # Install required packages for Gitlab
 node['gitlab']['packages'].each do |gitlab_pkg|
@@ -31,7 +33,6 @@ end
 %w{ charlock_holmes bundler sshkey }.each do |pkg|
   gem_package pkg do
     action :install
-    ignore_failure true
   end
 end
 
@@ -49,7 +50,7 @@ user node['gitlab']['user'] do
 end
 
 # Add the gitlab user to the "gitolite" group
-group node['gitolite']['security_group'] do
+group node['gitlab']['git_group'] do
   members node['gitlab']['user']
 end
 
@@ -95,20 +96,20 @@ template "#{node['gitlab']['home']}/.ssh/id_rsa.pub" do
 end
 
 # Render public key template for gitolite user
-template "#{node['gitolite']['git_home']}/gitlab.pub" do
+template "#{node['gitlab']['git_home']}/gitlab.pub" do
   source "id_rsa.pub.erb"
-  owner node['gitolite']['admin_name']
-  group node['gitolite']['security_group']
+  owner node['gitlab']['git_user']
+  group node['gitlab']['git_group']
   mode 0644
 end
 
 # Sorry for this, it seems maybe something is wrong with the 'gitolite setup' script.
 # This was implemented as a workaround.
-execute "install-gitolite-admin-key" do
-  command "su - #{node['gitolite']['admin_name']} -c 'perl #{node['gitolite']['gitolite_home']}/src/gitolite setup -pk #{node['gitolite']['git_home']}/gitlab.pub'"
+execute "install-gitlab-key" do
+  command "su - #{node['gitlab']['git_user']} -c 'perl #{node['gitlab']['gitolite_home']}/src/gitolite setup -pk #{node['gitlab']['git_home']}/gitlab.pub'"
   user "root"
-  cwd node['gitolite']['gitolite_home']
-  not_if { "grep -q #{node['gitlab']['user']} #{node['gitolite']['gitolite_home']}/.ssh/authorized_keys" }
+  cwd node['gitlab']['git_home']
+  not_if "grep -q '#{node['gitlab']['user']}' #{node['gitlab']['git_home']}/.ssh/authorized_keys"
 end
 
 # Clone Gitlab repo from github
@@ -138,18 +139,23 @@ link "#{node['gitlab']['home']}/app/config/database.yml" do
   not_if { File.exists?("#{node['gitlab']['home']}/app/config/database.yml") }
 end
 
+if File.exists?("/opt/opscode/embedded/bin/")
+  ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/opscode/bin:/opt/opscode/embedded/bin"
+end
+
 # Install Gems with bundle install
 execute "gitlab-bundle" do
   command "bundle install --without development test --deployment"
-  cwd "#{node['gitlab']['gitlab_home']}/app"
-  user node['gitlab']['user'] 
-  not_if "test -d #{node['gitlab']['home']}/db"
+  cwd "#{node['gitlab']['home']}/app"
+  user node['gitlab']['user']
+  environment({ 'LANG' => "en_US.UTF-8", 'LC_ALL' => "en_US.UTF-8" })
+  not_if "test -d #{node['gitlab']['home']}/app/vendor/bundle"
 end
 
 # Setup database for Gitlab
-execute "gitlab-bundle-rake" do
-  command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
-  cwd "#{node['gitlab']['home']}/app"
-  user node['gitlab']['user'] 
-  not_if "test -d #{node['gitlab']['home']}/app/db"
-end
+#execute "gitlab-bundle-rake" do
+#  command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
+#  cwd "#{node['gitlab']['home']}/app"
+#  user node['gitlab']['user'] 
+#  not_if "test -d #{node['gitlab']['home']}/app/db"
+#end

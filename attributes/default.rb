@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_attribute "gitolite"
-
 # Set attributes for the git user
 default['gitlab']['user'] = "gitlab"
 default['gitlab']['group'] = "gitlab"
