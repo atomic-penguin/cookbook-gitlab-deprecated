@@ -27,8 +27,13 @@ node['gitlab']['packages'].each do |gitlab_pkg|
   package gitlab_pkg
 end
 
+# Install sshkey gem into chef
+chef_gem "sshkey" do
+  action :install
+end
+
 # Install required Ruby Gems for Gitlab
-%w{ charlock_holmes bundler sshkey }.each do |pkg|
+%w{ charlock_holmes bundler }.each do |pkg|
   gem_package pkg do
     action :install
   end

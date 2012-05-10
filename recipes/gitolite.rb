@@ -31,7 +31,7 @@ user node['gitlab']['git_user'] do
 end
 
 directory node['gitlab']['git_home'] do
-  user node['gitlab']['git_user']
+  owner node['gitlab']['git_user']
   group node['gitlab']['git_group']
   mode 0750
 end
