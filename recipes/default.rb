@@ -2,7 +2,8 @@
 # Cookbook Name:: gitlab
 # Recipe:: default
 #
-# Copyright 2012, Marshall University
+# Copyright 2012, Gerald L. Hevener Jr., M.S.
+# Copyright 2012, Eric G. Wolfe
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,8 +147,12 @@ link "#{node['gitlab']['home']}/app/config/database.yml" do
   link_type :hard
 end
 
-if File.exists?("/opt/opscode/embedded/bin/")
-  ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/opscode/bin:/opt/opscode/embedded/bin"
+# Assume the user has an old redhat-shipped Ruby
+case node['platform']
+when "redhat","centos","scientific"
+  if File.exists?("/opt/opscode/embedded/bin")
+    ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/opscode/bin:/opt/opscode/embedded/bin"
+  end
 end
 
 # Install Gems with bundle install
@@ -165,4 +170,32 @@ execute "gitlab-bundle-rake" do
   cwd "#{node['gitlab']['home']}/app"
   user node['gitlab']['user'] 
   not_if { File.exists?("#{node['gitlab']['home']}/app/db/production.sqlite3") }
+end
+
+template "#{node['gitlab']['home']}/app/config/unicorn.rb" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 0644
+end
+
+template "/etc/nginx/nginx.conf" do
+  owner "root"
+  group "root"
+  mode 0644
+  notifies :reload, "service[nginx]"
+end
+
+template "/etc/init.d/gitlab" do
+  owner "root"
+  group "root"
+  mode 0755
+  source "gitlab.init.erb"
+end
+
+service "gitlab" do
+  action [ :start, :enable ]
+end
+
+service "nginx" do
+  action [ :start, :enable ]
 end
