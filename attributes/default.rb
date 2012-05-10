@@ -26,3 +26,5 @@ when "ubuntu","debian","linuxmint"
 when "redhat","centos","amazon","scientific"
   default['gitlab']['packages'] = %w[ curl wget libxslt-devel sqlite-devel openssl-devel mysql++-devel libicu-devel glibc-devel libyaml-devel ]
 end
+
+default['gitlab']['trust_local_sshkeys'] = "yes"

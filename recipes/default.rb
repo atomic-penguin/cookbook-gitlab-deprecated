@@ -101,6 +101,13 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   mode 0644
 end
 
+template "#{node['gitlab']['home']}/.ssh/config" do
+  source "ssh_config.erb"
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 0644
+end
+
 # Sorry for this, it seems maybe something is wrong with the 'gitolite setup' script.
 # This was implemented as a workaround.
 execute "install-gitlab-key" do
@@ -119,13 +126,11 @@ git "#{node['gitlab']['home']}/app" do
   group node['gitlab']['group']
 end
 
-# Link example config file to gitlab.yml
-link "#{node['gitlab']['home']}/app/config/gitlab.yml" do
-  to "#{node['gitlab']['home']}/app/config/gitlab.yml.example"
+# Render config file
+template "#{node['gitlab']['home']}/app/config/gitlab.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  link_type :hard
-  not_if { File.exists?("#{node['gitlab']['home']}/app/config/gitlab.yml") }
+  mode 0644
 end
 
 # Link example config file to database.yml
@@ -134,7 +139,6 @@ link "#{node['gitlab']['home']}/app/config/database.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   link_type :hard
-  not_if { File.exists?("#{node['gitlab']['home']}/app/config/database.yml") }
 end
 
 if File.exists?("/opt/opscode/embedded/bin/")
@@ -142,18 +146,18 @@ if File.exists?("/opt/opscode/embedded/bin/")
 end
 
 # Install Gems with bundle install
-execute "gitlab-bundle" do
+execute "gitlab-bundle-install" do
   command "bundle install --without development test --deployment"
   cwd "#{node['gitlab']['home']}/app"
   user node['gitlab']['user']
   environment({ 'LANG' => "en_US.UTF-8", 'LC_ALL' => "en_US.UTF-8" })
-  not_if "test -d #{node['gitlab']['home']}/app/vendor/bundle"
+  not_if { File.exists?("#{node['gitlab']['home']}/app/vendor/bundle") }
 end
 
 # Setup database for Gitlab
-#execute "gitlab-bundle-rake" do
-#  command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
-#  cwd "#{node['gitlab']['home']}/app"
-#  user node['gitlab']['user'] 
-#  not_if "test -d #{node['gitlab']['home']}/app/db"
-#end
+execute "gitlab-bundle-rake" do
+  command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
+  cwd "#{node['gitlab']['home']}/app"
+  user node['gitlab']['user'] 
+  not_if { File.exists?("#{node['gitlab']['home']}/app/db/production.sqlite3") }
+end
