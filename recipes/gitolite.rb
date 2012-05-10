@@ -30,6 +30,12 @@ user node['gitlab']['git_user'] do
   supports :manage_home => true
 end
 
+directory node['gitlab']['git_home'] do
+  user node['gitlab']['git_user']
+  group node['gitlab']['git_group']
+  mode 0750
+end
+
 %w{ bin repositories }.each do |subdir|
   directory "#{node['gitlab']['git_home']}/#{subdir}" do
     owner node['gitlab']['git_user']
