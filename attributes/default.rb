@@ -24,7 +24,7 @@ default['gitlab']['home'] = "/var/gitlab"
 default['gitlab']['app_home'] = "#{node['gitlab']['home']}/gitlab"
 
 # Set github URL for gitlab
-default['gitlab']['repository_url'] = "git://github.com/gitlabhq/gitlabhq.git"
+default['gitlab']['gitlab_url'] = "git://github.com/gitlabhq/gitlabhq.git"
 
 # Required packages for Gitlab
 case node['platform']
@@ -39,17 +39,14 @@ when "redhat","centos","amazon","scientific"
   case node['platform_version'].to_i
   when 5
     default['gitlab']['packages'] = %w{
-      rubygems ruby ruby-libs ruby-devel ruby-docs 
-      ruby-ri ruby-irb ruby-rdoc ruby-mode curl wget
-      libxslt-devel sqlite-devel openssl-devel mysql++-devel
-      libicu-devel glibc-devel libyaml-devel nginx python26
-      python26-devel
+      curl wget libxslt-devel sqlite-devel openssl-devel
+      mysql++-devel libicu-devel glibc-devel libyaml-devel
+      nginx python26 python26-devel
     }
   when 6
     default['gitlab']['packages'] = %w{
-      rubygems ruby ruby-libs ruby-devel ruby-docs ruby-ri
-      ruby-irb ruby-rdoc curl wget libxslt-devel sqlite-devel
-      openssl-devel mysql++-devel libicu-devel glibc-devel
+      curl wget libxslt-devel sqlite-devel openssl-devel
+      mysql++-devel libicu-devel glibc-devel
       libyaml-devel nginx python python-devel
     }
   end

@@ -10,13 +10,13 @@ upstream unicorn_rails {
     # server 192.168.0.7:8080 fail_timeout=0;
     # server 192.168.0.8:8080 fail_timeout=0;
     # server 192.168.0.9:8080 fail_timeout=0;
-  }
+}
 
 server {
     listen       80;
     server_name  _;
 
-    access_log  /var/log/<%= node['hostname'] %>.access.log  combined;
+    access_log  /var/log/nginx/<%= node['hostname'] %>.access.log  combined;
 
     # path for static files
     root <%= node['gitlab']['app_home'] %>/public;

@@ -145,7 +145,7 @@ end
 
 # Clone Gitlab repo from github
 git node['gitlab']['app_home'] do
-  repository node['gitlab']['repository_url']
+  repository node['gitlab']['gitlab_url']
   reference "master"
   action :checkout
   user node['gitlab']['user']
