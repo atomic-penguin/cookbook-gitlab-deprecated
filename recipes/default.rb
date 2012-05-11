@@ -19,13 +19,31 @@
 #
 
 # Include cookbook dependencies
-%w{ gitlab::gitolite sqlite redisio::install redisio::enable build-essential readline python sudo openssh xml zlib }.each do |cb_include|
-  include_recipe cb_include
+%w{ ruby_build gitlab::gitolite build-essential
+    readline sudo openssh xml zlib python::pip
+    redisio::install redisio::enable sqlite }.each do |requirement|
+  include_recipe requirement
+end
+
+# There are problems deploying on Redhat provided rubies.
+# We'll use Fletcher Nichol's slick ruby_build cookbook to compile a Ruby.
+if node['gitlab']['install_ruby'] !~ /package/
+  ruby_build_ruby node['gitlab']['install_ruby'] 
+
+  # Drop off a profile script.
+  template "/etc/profile.d/gitlab.sh" do
+    owner "root"
+    group "root"
+    mode 0755
+  end
+
+  # Set PATH for remainder of recipe.
+  ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/ruby/#{node['gitlab']['install_ruby']}/bin"
 end
 
 # Install required packages for Gitlab
-node['gitlab']['packages'].each do |gitlab_pkg|
-  package gitlab_pkg
+node['gitlab']['packages'].each do |pkg|
+  package pkg
 end
 
 # Install sshkey gem into chef
@@ -34,8 +52,8 @@ chef_gem "sshkey" do
 end
 
 # Install required Ruby Gems for Gitlab
-%w{ charlock_holmes bundler }.each do |pkg|
-  gem_package pkg do
+%w{ charlock_holmes bundler }.each do |gempkg|
+  gem_package gempkg do
     action :install
   end
 end
@@ -53,7 +71,7 @@ user node['gitlab']['user'] do
   supports :manage_home => true
 end
 
-# Add the gitlab user to the "gitolite" group
+# Add the gitlab user to the "git" group
 group node['gitlab']['git_group'] do
   members node['gitlab']['user']
 end
@@ -107,6 +125,7 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   mode 0644
 end
 
+# Configure gitlab user to auto-accept localhost SSH keys
 template "#{node['gitlab']['home']}/.ssh/config" do
   source "ssh_config.erb"
   owner node['gitlab']['user']
@@ -114,7 +133,8 @@ template "#{node['gitlab']['home']}/.ssh/config" do
   mode 0644
 end
 
-# Sorry for this, it seems maybe something is wrong with the 'gitolite setup' script.
+# Sorry for this ugliness.
+# It seems maybe something is wrong with the 'gitolite setup' script.
 # This was implemented as a workaround.
 execute "install-gitlab-key" do
   command "su - #{node['gitlab']['git_user']} -c 'perl #{node['gitlab']['gitolite_home']}/src/gitolite setup -pk #{node['gitlab']['git_home']}/gitlab.pub'"
@@ -124,7 +144,7 @@ execute "install-gitlab-key" do
 end
 
 # Clone Gitlab repo from github
-git "#{node['gitlab']['home']}/app" do
+git node['gitlab']['app_home'] do
   repository node['gitlab']['repository_url']
   reference "master"
   action :checkout
@@ -132,70 +152,67 @@ git "#{node['gitlab']['home']}/app" do
   group node['gitlab']['group']
 end
 
-# Render config file
-template "#{node['gitlab']['home']}/app/config/gitlab.yml" do
+# Render gitlab config file
+template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
 end
 
-# Link example config file to database.yml
-link "#{node['gitlab']['home']}/app/config/database.yml" do
-  to "#{node['gitlab']['home']}/app/config/database.yml.sqlite"
+# Link sqlite example config file to database.yml
+link "#{node['gitlab']['app_home']}/config/database.yml" do
+  to "#{node['gitlab']['app_home']}/config/database.yml.sqlite"
   owner node['gitlab']['user']
   group node['gitlab']['group']
   link_type :hard
 end
 
-# Assume the user has an old redhat-shipped Ruby
-case node['platform']
-when "redhat","centos","scientific"
-  if File.exists?("/opt/opscode/embedded/bin")
-    ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/opscode/bin:/opt/opscode/embedded/bin"
-  end
-end
-
 # Install Gems with bundle install
 execute "gitlab-bundle-install" do
   command "bundle install --without development test --deployment"
-  cwd "#{node['gitlab']['home']}/app"
+  cwd node['gitlab']['app_home']
   user node['gitlab']['user']
+  group node['gitlab']['group']
   environment({ 'LANG' => "en_US.UTF-8", 'LC_ALL' => "en_US.UTF-8" })
-  not_if { File.exists?("#{node['gitlab']['home']}/app/vendor/bundle") }
+  not_if { File.exists?("#{node['gitlab']['app_home']}/vendor/bundle") }
 end
 
-# Setup database for Gitlab
+# Setup sqlite database for Gitlab
 execute "gitlab-bundle-rake" do
   command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
-  cwd "#{node['gitlab']['home']}/app"
+  cwd node['gitlab']['app_home']
   user node['gitlab']['user'] 
-  not_if { File.exists?("#{node['gitlab']['home']}/app/db/production.sqlite3") }
+  group node['gitlab']['group']
+  not_if { File.exists?("#{node['gitlab']['app_home']}/db/production.sqlite3") }
 end
 
-template "#{node['gitlab']['home']}/app/config/unicorn.rb" do
+# Render unicorn template
+template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
 end
 
-template "/etc/nginx/nginx.conf" do
-  owner "root"
-  group "root"
-  mode 0644
-  notifies :reload, "service[nginx]"
-end
-
-template "/etc/init.d/gitlab" do
+# Render unicorn_rails init script
+template "/etc/init.d/unicorn_rails" do
   owner "root"
   group "root"
   mode 0755
-  source "gitlab.init.erb"
+  source "unicorn_rails.init.erb"
 end
 
-service "gitlab" do
-  action [ :start, :enable ]
+# Start unicorn_rails and nginx service
+%w{ unicorn_rails nginx }.each do |svc|
+  service svc do
+    action [ :start, :enable ]
+  end
 end
 
-service "nginx" do
-  action [ :start, :enable ]
+# Render nginx default vhost config
+template "/etc/nginx/conf.d/default.conf" do
+  owner "root"
+  group "root"
+  mode 0644
+  source "nginx.default.conf.erb"
+  notifies :restart, "service[nginx]"
 end

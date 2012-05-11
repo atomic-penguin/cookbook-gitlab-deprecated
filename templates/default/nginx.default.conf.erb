@@ -1,0 +1,50 @@
+upstream unicorn_rails {
+    # fail_timeout=0 means we always retry an upstream even if it failed
+    # to return a good HTTP response (in case the Unicorn master nukes a
+    # single worker for timing out).
+
+    # for UNIX domain socket setups:
+    server unix:<%= node['gitlab']['app_home'] %>/tmp/sockets/gitlab.socket fail_timeout=0;
+
+    # for TCP setups, point these to your backend servers
+    # server 192.168.0.7:8080 fail_timeout=0;
+    # server 192.168.0.8:8080 fail_timeout=0;
+    # server 192.168.0.9:8080 fail_timeout=0;
+  }
+
+server {
+    listen       80;
+    server_name  _;
+
+    access_log  /var/log/<%= node['hostname'] %>.access.log  combined;
+
+    # path for static files
+    root <%= node['gitlab']['app_home'] %>/public;
+
+    # Prefer to serve static files directly from nginx to avoid unnecessary
+    # data copies from the application server.
+    #
+    # try_files directive appeared in in nginx 0.7.27 and has stabilized
+    # over time.  Older versions of nginx (e.g. 0.6.x) requires
+    # "if (!-f $request_filename)" which was less efficient:
+    # http://bogomips.org/unicorn.git/tree/examples/nginx.conf?id=v3.3.1#n127
+    try_files $uri $uri/index.html $uri.html @unicorn_rails;
+
+    location / {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+
+      if (!-f $request_filename) {
+        proxy_pass http://unicorn_rails;
+        break;
+      }
+    }
+
+    # Rails error pages
+    error_page 500 502 503 504 /500.html;
+    location = /500.html {
+      root <%= node['gitlab']['app_home'] %>/public;
+    }
+
+}

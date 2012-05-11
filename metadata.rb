@@ -7,9 +7,9 @@ version          "0.1.0"
 %w{ gitolite nginx }.each do |cb_conflict|
   conflicts cb_conflict
 end
-%w{ chef_gem git sqlite redisio build-essential python readline sudo openssh perl xml zlib}.each do |cb_depend|
+%w{ ruby_build chef_gem git sqlite redisio build-essential python readline sudo openssh perl xml zlib}.each do |cb_depend|
   depends cb_depend
 end
-%w{ redhat centos scientific amazon debin ubuntu linuxmint }.each do |os|
+%w{ redhat centos scientific amazon debian ubuntu }.each do |os|
   supports os
 end
