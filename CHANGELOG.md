@@ -1,7 +1,10 @@
 ## v0.2.0
 
-  * Moar testing
   * Epic public release <crowd cheers>
+  * Moar testing
+  * Clean up init script
+  * Fix unicorn config
+  * Fix gitlab home permissions for nginx
 
 ## v0.1.0
 

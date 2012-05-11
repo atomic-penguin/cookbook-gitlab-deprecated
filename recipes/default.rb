@@ -71,6 +71,13 @@ user node['gitlab']['user'] do
   supports :manage_home => true
 end
 
+# Fix home permissions for nginx
+directory node['gitlab']['home']
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 0755
+end
+
 # Add the gitlab user to the "git" group
 group node['gitlab']['git_group'] do
   members node['gitlab']['user']
