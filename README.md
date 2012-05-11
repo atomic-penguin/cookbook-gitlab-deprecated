@@ -127,13 +127,19 @@ Attributes
     or Rubies are built
   - Redhat family defaults 1.9.2; Debian family defaults to package.
 
-
 Usage
 =====
 
 Optionally override application paths using gitlab['git\_home'] and gitlab['home'].
 
 Add recipe gitlab::default to run\_list.  Go grab a lunch, or two, if Ruby has to build.
+
+The default admin credentials for the gitlab application are as follows:
+
+    User: admin@local.host
+    Password: 5iveL!fe
+
+Of course you should change these first thing, once deployed.
 
 License and Author
 ==================
