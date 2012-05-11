@@ -150,7 +150,8 @@ Copyright: 2012
 Author: Eric G. Wolfe 
 Copyright: 2012
 
-Gitolite
+Gitlolite Author: David Ruan
+Copyright: RailsAnt, Inc., 2010
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
