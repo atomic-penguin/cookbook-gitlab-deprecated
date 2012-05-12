@@ -1,3 +1,10 @@
+## v0.2.1
+
+  Thanks to Fletcher Nichol for the feedback and fixes :)
+
+  * Add `gitlab_branch` attribute.
+  * Fix directory block syntax (do).
+
 ## v0.2.0
 
   * Epic public release <crowd cheers>
