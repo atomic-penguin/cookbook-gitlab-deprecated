@@ -97,13 +97,12 @@ gitlab_sshkey = SSHKey.generate(:type => 'RSA', :comment => "#{node['gitlab']['u
 node.set_unless['gitlab']['public_key'] = gitlab_sshkey.ssh_public_key
 
 # Save public_key to node, unless it is already set.
-unless Chef::Config[:solo]
-  ruby_block "save node data" do
-    block do
-      node.save
-    end
-    action :create
+ruby_block "save node data" do
+  block do
+    node.save
   end
+  not_if { Chef::Config[:solo]
+  action :create
 end
 
 # Render private key template

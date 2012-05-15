@@ -1,3 +1,5 @@
+# <a name="title"></a> cookbook-gitlab [![Build Status](https://secure.travis-ci.org/atomic-penguin/chef-ruby_build.png?branch=master)](http://travis-ci.org/atomic-penguin/cookbook-gitlab)
+
 Description
 ===========
 
