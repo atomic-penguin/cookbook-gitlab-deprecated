@@ -158,6 +158,13 @@ git node['gitlab']['app_home'] do
   group node['gitlab']['group']
 end
 
+directory "#{node['gitlab']['app_home']}/tmp" do
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  mode "0755"
+  action :create
+end
+
 # Render gitlab config file
 template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   owner node['gitlab']['user']
