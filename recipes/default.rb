@@ -221,6 +221,21 @@ end
   end
 end
 
+bash "Create SSL key" do
+  not_if { ! node['gitlab']['https'] || File.exists?(node['gitlab']['ssl_certificate_key']) }
+  cwd "/etc/nginx"
+  code <<-EOF
+umask 077
+openssl genrsa 2048 > #{node['gitlab']['ssl_certificate_key']}
+EOF
+end
+
+bash "Create SSL certificate" do
+  not_if { ! node['gitlab']['https'] || File.exists?(node['gitlab']['ssl_certificate']) }
+  cwd "/etc/nginx"
+  code "openssl req -subj \"#{node['gitlab']['ssl_req']}\" -new -x509 -nodes -sha1 -days 3650 -key #{node['gitlab']['ssl_certificate_key']} > #{node['gitlab']['ssl_certificate']}"
+end
+
 # Render nginx default vhost config
 template "/etc/nginx/conf.d/default.conf" do
   owner "root"

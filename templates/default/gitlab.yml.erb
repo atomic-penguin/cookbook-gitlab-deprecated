@@ -6,8 +6,8 @@
 # Web application specific settings
 web:
   host: <%= node['fqdn'] %>
-  port: 80
-  https: false
+  port: <%= node['gitlab']['https'] ? 443 : 80 %>
+  https: <%= node['gitlab']['https'] %>
 
 # Email used for notification
 # about new issues, comments
@@ -17,7 +17,7 @@ email:
 
   # Protocol used for links in email letters
   # Value can be http or https
-  protocol: http # or https
+  protocol: <%= node['gitlab']['https'] ? "https" : "http" %>
 
 # Application specific settings
 # Like default project limit for user etc
