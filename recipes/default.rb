@@ -20,9 +20,14 @@
 
 # Include cookbook dependencies
 %w{ ruby_build gitlab::gitolite build-essential
-    readline sudo openssh xml zlib python::pip
+    readline sudo openssh xml zlib python::package python::pip
     redisio::install redisio::enable sqlite }.each do |requirement|
   include_recipe requirement
+end
+
+# symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
+link "/usr/bin/redis-cli" do
+  to "/usr/local/bin/redis-cli"
 end
 
 # There are problems deploying on Redhat provided rubies.
