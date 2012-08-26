@@ -1,5 +1,5 @@
 %RC = (
-    UMASK                       =>  <%= node['gitlab']['gitolite_umask'] -%>,
+    UMASK                       =>  <%= @gitolite_umask -%>,
     GIT_CONFIG_KEYS             =>  '',
     LOG_EXTRA                   =>  1,
     ROLES                       =>

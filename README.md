@@ -54,7 +54,6 @@ Much kudos to everyone who added indirectly to the epicness of this cookbook.
 
 * Opscode, Inc cookbooks
   - [git](http://ckbk.it/git)
-  - [sqlite](http://ckbk.it/sqlite)
   - [build-essential](http://ckbk.it/build-essential)
   - [python::pip](http://ckbk.it/python)
   - [sudo](http://ckbk.it/sudo)

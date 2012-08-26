@@ -21,7 +21,7 @@
 # Include cookbook dependencies
 %w{ ruby_build gitlab::gitolite build-essential
     readline sudo openssh xml zlib python::package python::pip
-    redisio::install redisio::enable sqlite }.each do |requirement|
+    redisio::install redisio::enable }.each do |requirement|
   include_recipe requirement
 end
 
@@ -40,6 +40,10 @@ if node['gitlab']['install_ruby'] !~ /package/
     owner "root"
     group "root"
     mode 0755
+    variables(
+      :fqdn => node['fqdn'],
+      :install_ruby => node['gitlab']['install_ruby']
+    )
   end
 
   # Set PATH for remainder of recipe.
@@ -126,6 +130,9 @@ template "#{node['gitlab']['home']}/.ssh/id_rsa.pub" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
+  variables(
+    :public_key => node['gitlab']['public_key']
+  )
 end
 
 # Render public key template for gitolite user
@@ -142,6 +149,10 @@ template "#{node['gitlab']['home']}/.ssh/config" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
+  variables(
+    :fqdn => node['fqdn'],
+    :trust_local_sshkeys => node['gitlab']['trust_local_sshkeys']
+  )
 end
 
 # Sorry for this ugliness.
@@ -175,6 +186,12 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
+  variables(
+    :fqdn => node['fqdn'],
+    :https_boolean => node['gitlab']['https'],
+    :git_user => node['gitlab']['git_user'],
+    :git_home => node['gitlab']['git_home']
+  )
 end
 
 # Link sqlite example config file to database.yml
@@ -209,6 +226,10 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
+  variables(
+    :fqdn => node['fqdn'],
+    :gitlab_app_home => node['gitlab']['app_home']
+  )
 end
 
 # Render unicorn_rails init script
@@ -217,6 +238,10 @@ template "/etc/init.d/unicorn_rails" do
   group "root"
   mode 0755
   source "unicorn_rails.init.erb"
+  variables(
+    :fqdn => node['fqdn'],
+    :gitlab_app_home => node['gitlab']['app_home']
+  )
 end
 
 # Start unicorn_rails and nginx service
@@ -248,4 +273,11 @@ template "/etc/nginx/conf.d/default.conf" do
   mode 0644
   source "nginx.default.conf.erb"
   notifies :restart, "service[nginx]"
+  variables(
+    :hostname => node['hostname'],
+    :gitlab_app_home => node['gitlab']['app_home'],
+    :https_boolean => node['gitlab']['https'],
+    :ssl_certificate => node['gitlab']['ssl_certificate'],
+    :ssl_certificate_key => node['gitlab']['ssl_certificate_key']
+  )
 end

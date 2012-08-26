@@ -4,7 +4,7 @@ upstream unicorn_rails {
     # single worker for timing out).
 
     # for UNIX domain socket setups:
-    server unix:<%= node['gitlab']['app_home'] %>/tmp/sockets/gitlab.socket fail_timeout=0;
+    server unix:<%= @gitlab_app_home %>/tmp/sockets/gitlab.socket fail_timeout=0;
 
     # for TCP setups, point these to your backend servers
     # server 192.168.0.7:8080 fail_timeout=0;
@@ -13,20 +13,20 @@ upstream unicorn_rails {
 }
 
 server {
-    listen       <%= node['gitlab']['https'] ? 443 : 80 %>;
+    listen       <%= @https_boolean ? 443 : 80 %>;
     client_max_body_size 4G;
     server_name  _;
-    <% if node['gitlab']['https'] %>
+    <% if @https_boolean %>
     ssl on;
-    ssl_certificate <%= node['gitlab']['ssl_certificate'] %>;
-    ssl_certificate_key <%= node['gitlab']['ssl_certificate_key'] %>;
+    ssl_certificate <%= @ssl_certificate %>;
+    ssl_certificate_key <%= @ssl_certificate_key %>;
     <% end %>
 
 
-    access_log  /var/log/nginx/<%= node['hostname'] %>.access.log  combined;
+    access_log  /var/log/nginx/<%= @hostname %>.access.log  combined;
 
     # path for static files
-    root <%= node['gitlab']['app_home'] %>/public;
+    root <%= @gitlab_app_home %>/public;
 
     # Prefer to serve static files directly from nginx to avoid unnecessary
     # data copies from the application server.
@@ -39,7 +39,7 @@ server {
 
     location / {
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto <%= node['gitlab']['https'] ? "https" : "http" %>;
+      proxy_set_header X-Forwarded-Proto <%= @https_boolean ? "https" : "http" %>;
       proxy_set_header Host $http_host;
       proxy_redirect off;
 
@@ -52,7 +52,7 @@ server {
     # Rails error pages
     error_page 500 502 503 504 /500.html;
     location = /500.html {
-      root <%= node['gitlab']['app_home'] %>/public;
+      root <%= @gitlab_app_home %>/public;
     }
 
 }

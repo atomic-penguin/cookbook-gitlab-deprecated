@@ -1,3 +1,12 @@
+## v0.3.0
+
+* Missing bracket
+* Change single-quote variable to symbol notation
+* install python and symlink redis-cli so hooks work
+* HTTPS options for nginx
+* Ubuntu/Debian platform compatibility fixes
+* [FC035](http://acrmp.github.com/foodcritic/#FC035): Template uses node attribute directly
+
 ## v0.2.1
 
   Thanks to Fletcher Nichol for the feedback and fixes :)

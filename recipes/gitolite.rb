@@ -73,5 +73,8 @@ template "#{node['gitlab']['git_home']}/.gitolite.rc" do
   source "gitolite.rc.erb"
   owner node['gitlab']['git_user']
   group node['gitlab']['git_group']
-  mode 0644 
+  mode 0644
+  variables(
+    :gitolite_umask => node['gitlab']['gitolite_umask']
+  ) 
 end
