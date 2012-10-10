@@ -140,6 +140,9 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   source "id_rsa.pub.erb"
   owner node['gitlab']['git_user']
   group node['gitlab']['git_group']
+  variables(
+    :public_key => node['gitlab']['public_key']
+  )
   mode 0644
 end
 

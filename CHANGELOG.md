@@ -1,3 +1,8 @@
+## v0.3.1
+
+* ISSUE 7: public key template fails to render
+* ISSUE 8: unicorn_rails script fails on ruby package platforms 
+
 ## v0.3.0
 
 * Missing bracket

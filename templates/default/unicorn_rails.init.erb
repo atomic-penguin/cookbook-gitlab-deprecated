@@ -27,7 +27,9 @@ RESQUE_PID=<%= @gitlab_app_home %>/tmp/pids/resque_worker.pid
 
 case "$1" in
   start)
-        . /etc/profile.d/gitlab.sh || exit 1
+        if [ -x /etc/profile.d/gitlab.sh ]; then
+          . /etc/profile.d/gitlab.sh
+        fi
         CD_TO_APP_DIR="cd <%= @gitlab_app_home %>"
         START_DAEMON_PROCESS="bundle exec unicorn_rails $DAEMON_OPTS"
         START_RESQUE_PROCESS="./resque.sh"
