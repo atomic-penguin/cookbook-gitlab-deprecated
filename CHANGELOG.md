@@ -1,3 +1,7 @@
+## v0.3.2
+
+* Default gitlab branch to stable
+
 ## v0.3.1
 
 * ISSUE 7: public key template fails to render
