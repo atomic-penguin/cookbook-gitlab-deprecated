@@ -4,7 +4,7 @@ license          "Apache 2.0"
 description      "Installs/Configures gitlab"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 name             "gitlab"
-version          "0.3.2"
+version          "0.3.3"
 %w{ gitolite nginx }.each do |cb_conflict|
   conflicts cb_conflict
 end
