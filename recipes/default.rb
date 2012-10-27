@@ -25,6 +25,11 @@
   include_recipe requirement
 end
 
+case node['platform_family']
+when "rhel"
+  include_recipe "yumrepo::epel"
+end
+
 # symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
 link "/usr/bin/redis-cli" do
   to "/usr/local/bin/redis-cli"
@@ -133,6 +138,7 @@ template "#{node['gitlab']['home']}/.ssh/id_rsa.pub" do
   variables(
     :public_key => node['gitlab']['public_key']
   )
+  not_if { File.exists?("#{node['gitlab']['home']}/.ssh/id_rsa.pub") }
 end
 
 # Render public key template for gitolite user
@@ -140,10 +146,11 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   source "id_rsa.pub.erb"
   owner node['gitlab']['git_user']
   group node['gitlab']['git_group']
+  mode 0644
   variables(
     :public_key => node['gitlab']['public_key']
   )
-  mode 0644
+  not_if { File.exists?("#{node['gitlab']['git_home']}/gitlab.pub") }
 end
 
 # Configure gitlab user to auto-accept localhost SSH keys

@@ -8,7 +8,7 @@ version          "0.3.2"
 %w{ gitolite nginx }.each do |cb_conflict|
   conflicts cb_conflict
 end
-%w{ ruby_build git redisio build-essential python readline sudo openssh perl xml zlib}.each do |cb_depend|
+%w{ yumrepo ruby_build git redisio build-essential python readline sudo openssh perl xml zlib}.each do |cb_depend|
   depends cb_depend
 end
 %w{ redhat centos scientific amazon debian ubuntu }.each do |os|

@@ -1,3 +1,15 @@
+## v0.3.3
+
+Issues #9 and #10
+
+Issue 9: this version MAY fix issues with key generation when
+cookbook is invocated via chef-solo.  There may exist other
+chef-solo blockers within the cookbook.  Specifically, `File.exists?`
+guards were added to SSH public key generation code blocks.
+
+Issue 10: this version fixes one minor dependency bug with EPEL
+dependencies via metadata and inclusion.
+
 ## v0.3.2
 
 * Default gitlab branch to stable
