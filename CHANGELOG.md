@@ -1,3 +1,10 @@
+## v0.3.4
+
+Fix issues with stable snapshot v3.x
+    
+* Avoid installing pg, gem which adds extra dependencies
+* Add change to default gitolite.rc per upgrade instructions
+
 ## v0.3.3
 
 Issues #9 and #10
