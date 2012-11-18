@@ -1,0 +1,58 @@
+From 14513b76c453649fd5837632ed43e4fdbaf39cb9 Mon Sep 17 00:00:00 2001
+From: Greg Fitzgerald <greg@gregf.org>
+Date: Sun, 28 Oct 2012 00:57:13 -0400
+Subject: [PATCH] Fix issues with stable snapshot v3.x
+
+* Avoid installing pg, gem which adds extra dependencies
+* Add change to default gitolite.rc per upgrade instructions
+---
+ recipes/default.rb                |    6 +++---
+ templates/default/gitolite.rc.erb |    2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/recipes/default.rb b/recipes/default.rb
+index fba560c..a9f62f9 100644
+--- a/recipes/default.rb
++++ b/recipes/default.rb
+@@ -38,7 +38,7 @@ end
+ # There are problems deploying on Redhat provided rubies.
+ # We'll use Fletcher Nichol's slick ruby_build cookbook to compile a Ruby.
+ if node['gitlab']['install_ruby'] !~ /package/
+-  ruby_build_ruby node['gitlab']['install_ruby'] 
++  ruby_build_ruby node['gitlab']['install_ruby']
+ 
+   # Drop off a profile script.
+   template "/etc/profile.d/gitlab.sh" do
+@@ -214,7 +214,7 @@ end
+ 
+ # Install Gems with bundle install
+ execute "gitlab-bundle-install" do
+-  command "bundle install --without development test --deployment"
++  command "bundle install --without development test postgres --deployment"
+   cwd node['gitlab']['app_home']
+   user node['gitlab']['user']
+   group node['gitlab']['group']
+@@ -226,7 +226,7 @@ end
+ execute "gitlab-bundle-rake" do
+   command "bundle exec rake gitlab:app:setup RAILS_ENV=production"
+   cwd node['gitlab']['app_home']
+-  user node['gitlab']['user'] 
++  user node['gitlab']['user']
+   group node['gitlab']['group']
+   not_if { File.exists?("#{node['gitlab']['app_home']}/db/production.sqlite3") }
+ end
+diff --git a/templates/default/gitolite.rc.erb b/templates/default/gitolite.rc.erb
+index c6678b5..42b8a72 100644
+--- a/templates/default/gitolite.rc.erb
++++ b/templates/default/gitolite.rc.erb
+@@ -1,6 +1,6 @@
+ %RC = (
+     UMASK                       =>  <%= @gitolite_umask -%>,
+-    GIT_CONFIG_KEYS             =>  '',
++    GIT_CONFIG_KEYS             =>  '.*',
+     LOG_EXTRA                   =>  1,
+     ROLES                       =>
+         {
+-- 
+1.7.9.5
+
