@@ -282,7 +282,7 @@ template "/etc/nginx/sites-available/gitlab.conf" do
   owner "root"
   group "root"
   mode 0644
-  source "nginx.default.conf.erb"
+  source "nginx.gitlab.conf.erb"
   notifies :restart, "service[nginx]"
   variables(
     :hostname => node['hostname'],
