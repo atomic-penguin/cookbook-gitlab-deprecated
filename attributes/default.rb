@@ -79,4 +79,4 @@ default['gitlab']['ssl_req'] = "/C=US/ST=Several/L=Locality/O=Example/OU=Operati
 # Ip and port nginx will be serving requests on
 default['gitlab']['listen_ip'] = "*"
 # Default values: 80 for http, 443 for https
-default['gitlab']['list_port'] = nil
+default['gitlab']['listen_port'] = nil
