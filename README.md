@@ -144,6 +144,14 @@ Attributes
 * gitlab['ssl\_req']
   - Request subject used to generate a self-signed SSL certificate
 
+* gitlab['backup\_path']
+  - Path in file system where backups are stored.
+  - Defaults to gitlab['app\_home'] + backups/
+
+* gitlab['backup\_keep\_time']
+  - In seconds. Older backups will be deleted.
+  - Defaults to 604800
+
 Usage
 =====
 
