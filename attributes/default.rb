@@ -25,7 +25,7 @@ default['gitlab']['app_home'] = "#{node['gitlab']['home']}/gitlab"
 
 # Set github URL for gitlab
 default['gitlab']['gitlab_url'] = "https://github.com/gitlabhq/gitlabhq.git"
-default['gitlab']['gitlab_branch'] = "v3.1.0"
+default['gitlab']['gitlab_branch'] = "stable"
 
 # Required packages for Gitlab
 case node['platform']
