@@ -200,7 +200,9 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
     :fqdn => node['fqdn'],
     :https_boolean => node['gitlab']['https'],
     :git_user => node['gitlab']['git_user'],
-    :git_home => node['gitlab']['git_home']
+    :git_home => node['gitlab']['git_home'],
+    :backup_path => node['gitlab']['backup_path'],
+    :backup_keep_time => node['gitlab']['backup_keep_time']
   )
 end
 
