@@ -15,6 +15,7 @@ upstream unicorn_rails {
 server {
     listen       <%= @listen %>;
     client_max_body_size 4G;
+    server_name _;
     <% if @https_boolean %>
     ssl on;
     ssl_certificate <%= @ssl_certificate %>;

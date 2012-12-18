@@ -198,7 +198,7 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   mode 0644
   variables(
     :fqdn => node['fqdn'],
-    :port => node['gitlab']['listen_port'] || (node['gitlab']['https'] ? '443' : '80'),
+    :port => node['gitlab']['listen_port'],
     :https_boolean => node['gitlab']['https'],
     :git_user => node['gitlab']['git_user'],
     :git_home => node['gitlab']['git_home']
@@ -290,7 +290,7 @@ template "/etc/nginx/sites-available/gitlab.conf" do
     :https_boolean => node['gitlab']['https'],
     :ssl_certificate => node['gitlab']['ssl_certificate'],
     :ssl_certificate_key => node['gitlab']['ssl_certificate_key'],
-    :listen => node['gitlab']['listen_ip'] + ":" + (node['gitlab']['listen_port'] || (node['gitlab']['https'] ? '443' : '80'))
+    :listen => "#{node['gitlab']['listen_ip']}:#{node['gitlab']['listen_port']}"
   )
 end
 
