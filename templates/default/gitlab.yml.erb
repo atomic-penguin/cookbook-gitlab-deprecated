@@ -23,14 +23,8 @@ email:
 # Like default project limit for user etc
 app:
   default_projects_limit: 10
-  # backup_path: "/vol/backups"   # default: Rails.root + backups/
-  <% if @backup_path -%>
   backup_path: "<%= @backup_path %>"
-  <% end -%>
-  # backup_keep_time: 604800      # default: 0 (forever) (in seconds)
-  <% if @backup_keep_time -%>
   backup_keep_time: <%= @backup_keep_time %>
-  <% end -%>
 
 # Git Hosting congiguration
 git_host:
