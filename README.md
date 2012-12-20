@@ -149,7 +149,7 @@ Attributes
   - Defaults to gitlab['app\_home'] + backups/
 
 * gitlab['backup\_keep\_time']
-  - In seconds. Older backups will be deleted.
+  - In seconds. Older backups will automatically be deleted when new backup is created. Set to 0 to keep backups forever.
   - Defaults to 604800
 
 Usage
