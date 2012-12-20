@@ -206,14 +206,12 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   )
 end
 
-# Create the backup directory (if set)
-if node['gitlab']['backup_path']
-  directory node['gitlab']['backup_path'] do
-    owner node['gitlab']['user']
-    group node['gitlab']['group']
-    mode 00755
-    action :create
-  end
+# Create the backup directory
+directory node['gitlab']['backup_path'] do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 00755
+  action :create
 end
 
 # Link sqlite example config file to database.yml
