@@ -18,6 +18,9 @@
 # limitations under the License.
 #
 
+# Deactivate the nginx default site
+node.default['nginx']['default_site_enabled'] = false
+
 # Include cookbook dependencies
 %w{ ruby_build gitlab::gitolite build-essential
     readline sudo nginx openssh xml zlib python::package python::pip
@@ -275,6 +278,15 @@ bash "Create SSL certificate" do
   not_if { ! node['gitlab']['https'] || File.exists?(node['gitlab']['ssl_certificate']) }
   cwd "/etc/nginx"
   code "openssl req -subj \"#{node['gitlab']['ssl_req']}\" -new -x509 -nodes -sha1 -days 3650 -key #{node['gitlab']['ssl_certificate_key']} > #{node['gitlab']['ssl_certificate']}"
+end
+
+# Overwrite the default.conf of nginx on rhel as it will automatically host an
+# EPEL nginx test site on port 80 (not to be confused with nginxs default site)
+if node['platform_family'] == 'rhel'
+  cookbook_file "/etc/nginx/conf.d/default.conf" do
+    source "rhel.nginx.default.conf"
+    mode 00644
+  end
 end
 
 # Render nginx default vhost config
