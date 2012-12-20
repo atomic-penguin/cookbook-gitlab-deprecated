@@ -20,6 +20,8 @@
 
 # Deactivate the nginx default site
 node.default['nginx']['default_site_enabled'] = false
+# Either listen_port has been configured elsewhere or we calculate it depending on the https flag
+node.default['gitlab']['listen_port'] = node['gitlab']['listen_port'] || node['gitlab']['https'] ? 443 : 80
 
 # Include cookbook dependencies
 %w{ ruby_build gitlab::gitolite build-essential
@@ -302,7 +304,7 @@ template "/etc/nginx/sites-available/gitlab.conf" do
     :https_boolean => node['gitlab']['https'],
     :ssl_certificate => node['gitlab']['ssl_certificate'],
     :ssl_certificate_key => node['gitlab']['ssl_certificate_key'],
-    :listen => "#{node['gitlab']['listen_ip']}:#{node['gitlab']['listen_port']}"
+    :listen => node['gitlab']['listen_ip'] + ":" + node['gitlab']['listen_port']
   )
 end
 
