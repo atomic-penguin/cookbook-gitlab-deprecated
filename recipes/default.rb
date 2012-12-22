@@ -284,7 +284,8 @@ end
 
 # Overwrite the default.conf of nginx on rhel as it will automatically host an
 # EPEL nginx test site on port 80 (not to be confused with nginxs default site)
-if node['platform_family'] == 'rhel'
+case node['platform_family']
+when "rhel"
   cookbook_file "/etc/nginx/conf.d/default.conf" do
     source "rhel.nginx.default.conf"
     mode 00644
