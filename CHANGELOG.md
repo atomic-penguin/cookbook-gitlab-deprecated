@@ -1,3 +1,9 @@
+## v0.X.X
+
+* Database back-end changes via @sethvargo
+- Adds a mysql and postgresql database creation 
+- Breaking change: developed against githlabhq/master (sqlite no longer supported)
+
 ## v0.3.4
 
 Fix issues with stable snapshot v3.x
