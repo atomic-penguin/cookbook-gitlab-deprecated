@@ -200,7 +200,9 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
     :fqdn => node['fqdn'],
     :https_boolean => node['gitlab']['https'],
     :git_user => node['gitlab']['git_user'],
-    :git_home => node['gitlab']['git_home']
+    :git_home => node['gitlab']['git_home'],
+    :backup_path => node['gitlab']['backup_path'],
+    :backup_keep_time => node['gitlab']['backup_keep_time']
   )
 end
 
@@ -212,6 +214,14 @@ when 'postgres'
   include_recipe 'gitlab::postgres'
 else
   Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
+end
+
+# Create the backup directory
+directory node['gitlab']['backup_path'] do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 00755
+  action :create
 end
 
 # Write the database.yml
@@ -232,6 +242,7 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
 end
 
 without_group = node['gitlab']['database'] == 'mysql' ? 'postgres' : 'mysql'
+
 # Install Gems with bundle install
 execute "gitlab-bundle-install" do
   command "bundle install --without development test #{without_group} --deployment"

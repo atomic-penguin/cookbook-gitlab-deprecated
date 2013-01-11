@@ -1,7 +1,6 @@
 # <a name="title"></a> cookbook-gitlab [![Build Status](https://secure.travis-ci.org/atomic-penguin/cookbook-gitlab.png?branch=master)](http://travis-ci.org/atomic-penguin/cookbook-gitlab)
 
-Description
-===========
+## Description
 
 This cookbook will deploy gitlab; a free project and repository management
 application.
@@ -11,7 +10,7 @@ Code hosted on github [here](https://github.com/gitlabhq/gitlabhq/tree/stable).
 This cookbook was developed on RHEL/CentOS 6.  Other platforms may need re-worked,
 please open an issue or send a pull request to either, atomic-penguin or jackl0phty, on github.
 
-Requirements
+## Requirements
 ============
 
 * Hard disk space
@@ -23,8 +22,7 @@ Requirements
 * Nginx package
   - All platforms need an nginx package to configure Nginx and Unicorn.
 
-Cookbooks + Acknowledgements
-----------------------------
+## Cookbooks + Acknowledgements
 
 The dependencies in this cookbook add up to over 1,500 lines of code.
 This would not have been possible without the great community work of so many others.
@@ -63,8 +61,7 @@ Much kudos to everyone who added indirectly to the epicness of this cookbook.
   - [zlib](http://ckbk.it/zlib)
 
 
-Notes about conflicts
----------------------
+## Notes about conflicts
 
 * [gitolite](http://ckbk.it/gitolite) cookbook
   - The gitolite recipe within our cookbook was based on David Ruan's cookbook.
@@ -77,8 +74,7 @@ Notes about conflicts
   - Our default recipe templates out the /etc/nginx/conf.d/default.conf.  This will directly
     conflict with another cookbook, such as nginx, trying to manage this file.
 
-Attributes
-==========
+## Attributes
 
 * gitlab['gitolite\_url']
   - Github gitolite address
@@ -144,9 +140,19 @@ Attributes
 * gitlab['ssl\_req']
   - Request subject used to generate a self-signed SSL certificate
 
+* gitlab['backup\_path']
+  - Path in file system where backups are stored.
+  - Defaults to gitlab['app\_home'] + backups/
+
+* gitlab['backup\_keep\_time']
+  - In seconds. Older backups will automatically be deleted when new backup is created. Set to 0 to keep backups forever.
+  - Defaults to 604800
 
 ### Database Attributes
-Note, most of the database attributes have sane defaults. You will only need to change these configuration options if you're using a non-standard installation. Please see `attributes/default.rb` for more information on how a dynamic attribute is calculated.
+
+**Note**, most of the database attributes have sane defaults. You will only need to change these configuration options if
+you're using a non-standard installation. Please see `attributes/default.rb` for more information on how a dynamic attribute
+is calculated.
 
 * gitlab['database']['type']
   - The database (datastore) to use.
