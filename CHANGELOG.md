@@ -1,11 +1,13 @@
-## v0.X.X
+## v0.5.0
 
 * Database back-end changes via @sethvargo
   - Adds a mysql and postgresql database creation 
-  - Breaking change: developed against githlabhq/master (sqlite no longer supported)
+  - **Breaking change**: developed against githlabhq/master (sqlite no longer supported)
 
 * Gitolite deploy changes via @dscheu
   - Deploy gitlabhq/gitolite, not sitaramc/gitolite
+
+* Add configurable backup paths to Gitlab configuration via @dscheu
 
 ## v0.3.4
 
