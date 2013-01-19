@@ -26,7 +26,6 @@ ruby_block "save node data" do
     node.save
   end
   not_if { Chef::Config[:solo] }
-  action :create
 end
 
 # Helper variables
