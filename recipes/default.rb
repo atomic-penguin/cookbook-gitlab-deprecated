@@ -66,7 +66,7 @@ chef_gem "sshkey" do
 end
 
 # Install required Ruby Gems for Gitlab
-%w{ charlock_holmes bundler }.each do |gempkg|
+%w{ charlock_holmes bundler rake}.each do |gempkg|
   gem_package gempkg do
     action :install
   end
@@ -255,7 +255,7 @@ end
 
 # Setup sqlite database for Gitlab
 execute "gitlab-bundle-rake" do
-  command "bundle exec rake gitlab:app:setup RAILS_ENV=production && touch .gitlab-setup"
+  command "bundle exec rake gitlab:setup RAILS_ENV=production && touch .gitlab-setup"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
