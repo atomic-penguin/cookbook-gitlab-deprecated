@@ -107,7 +107,7 @@ end
 # Generate and deploy ssh public/private keys
 Gem.clear_paths
 require 'sshkey'
-gitlab_sshkey = SSHKey.generate(:type => 'RSA', :comment => "#{node['gitlab']['user']}@#{node['fqdn']}")
+gitlab_sshkey = SSHKey.generate(:type => 'RSA',:bits => 2048, :comment => "#{node['gitlab']['user']}@#{node['fqdn']}")
 node.set_unless['gitlab']['public_key'] = gitlab_sshkey.ssh_public_key
 
 # Save public_key to node, unless it is already set.
