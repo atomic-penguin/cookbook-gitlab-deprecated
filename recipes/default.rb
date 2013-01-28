@@ -198,6 +198,7 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   mode 0644
   variables(
     :fqdn => node['gitlab']['web_fqdn'] || node['fqdn'],
+    :gitolite_host => node['gitlab']['gitolite_host'] || "localhost",
     :https_boolean => node['gitlab']['https'],
     :git_user => node['gitlab']['git_user'],
     :git_home => node['gitlab']['git_home'],
