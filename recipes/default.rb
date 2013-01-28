@@ -273,12 +273,12 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   )
 end
 
-# Render unicorn_rails init script
-template "/etc/init.d/unicorn_rails" do
+# Render gitlab init script
+template "/etc/init.d/gitlab" do
   owner "root"
   group "root"
   mode 0755
-  source "unicorn_rails.init.erb"
+  source "gitlab.init.erb"
   variables(
     :fqdn => node['fqdn'],
     :gitlab_app_home => node['gitlab']['app_home']
@@ -286,7 +286,7 @@ template "/etc/init.d/unicorn_rails" do
 end
 
 # Start unicorn_rails and nginx service
-%w{ unicorn_rails nginx }.each do |svc|
+%w{ gitlab nginx }.each do |svc|
   service svc do
     action [ :start, :enable ]
   end
