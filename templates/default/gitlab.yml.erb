@@ -18,17 +18,15 @@ gitlab:
 
   ## Email settings
   # Email address used in the "From" field in mails sent by GitLab
-  email_from: gitlab@localhost
+  email_from: gitlab@<%= node['fqdn'] %> 
 
   # Email address of your support contact (default: same as email_from)
-  support_email: support@localhost
+  support_email: support@<%= node['fqdn'] %>
 
   ## Project settings
   default_projects_limit: 10
   # signup_enabled: true          # default: false - Account passwords are not sent via the email if signup is enabled.
 
-# Email used for notification
-# about new issues, comments
 ## Backup settings
 backup:
   path: "<%= @backup_path %>"   # Relative paths are relative to Rails.root (default: tmp/backups/)

@@ -197,7 +197,7 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   group node['gitlab']['group']
   mode 0644
   variables(
-    :fqdn => node['fqdn'],
+    :fqdn => node['gitlab']['web_fqdn'] || node['fqdn'],
     :https_boolean => node['gitlab']['https'],
     :git_user => node['gitlab']['git_user'],
     :git_home => node['gitlab']['git_home'],
