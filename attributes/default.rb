@@ -27,7 +27,7 @@ default['gitlab']['gitolite_host'] = nil
 
 # Set github URL for gitlab
 default['gitlab']['gitlab_url'] = "git://github.com/gitlabhq/gitlabhq.git"
-default['gitlab']['gitlab_branch'] = "4-1-stable"
+default['gitlab']['gitlab_branch'] = "4-2-stable"
 
 # Database setup
 default['gitlab']['database']['type'] = "mysql"
