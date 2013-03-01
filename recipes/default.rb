@@ -18,6 +18,14 @@
 # limitations under the License.
 #
 
+# Add the gitlab user
+user node['gitlab']['user'] do
+  comment "Gitlab User"
+  home node['gitlab']['home']
+  shell "/bin/bash"
+  supports :manage_home => true
+end
+
 # Include cookbook dependencies
 %w{ ruby_build gitlab::gitolite build-essential
     readline sudo openssh xml zlib python::package python::pip
@@ -26,8 +34,8 @@
 end
 
 case node['platform_family']
-when "rhel"
-  include_recipe "yumrepo::epel"
+  when "rhel"
+    include_recipe "yumrepo::epel"
 end
 
 # symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
@@ -46,8 +54,8 @@ if node['gitlab']['install_ruby'] !~ /package/
     group "root"
     mode 0755
     variables(
-      :fqdn => node['fqdn'],
-      :install_ruby => node['gitlab']['install_ruby']
+        :fqdn => node['fqdn'],
+        :install_ruby => node['gitlab']['install_ruby']
     )
   end
 
@@ -77,14 +85,6 @@ python_pip "pygments" do
   action :install
 end
 
-# Add the gitlab user
-user node['gitlab']['user'] do
-  comment "Gitlab User"
-  home node['gitlab']['home']
-  shell "/bin/bash"
-  supports :manage_home => true
-end
-
 # Fix home permissions for nginx
 directory node['gitlab']['home'] do
   owner node['gitlab']['user']
@@ -92,7 +92,7 @@ directory node['gitlab']['home'] do
   mode 0755
 end
 
-# Add the gitlab user to the "git" group
+# Add the gitlab user to the "git" group\
 group node['gitlab']['git_group'] do
   members node['gitlab']['user']
 end
@@ -124,7 +124,7 @@ template "#{node['gitlab']['home']}/.ssh/id_rsa" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   variables(
-    :private_key => gitlab_sshkey.private_key
+      :private_key => gitlab_sshkey.private_key
   )
   mode 0600
   not_if { File.exists?("#{node['gitlab']['home']}/.ssh/id_rsa") }
@@ -136,7 +136,7 @@ template "#{node['gitlab']['home']}/.ssh/id_rsa.pub" do
   group node['gitlab']['group']
   mode 0644
   variables(
-    :public_key => node['gitlab']['public_key']
+      :public_key => node['gitlab']['public_key']
   )
   not_if { File.exists?("#{node['gitlab']['home']}/.ssh/id_rsa.pub") }
 end
@@ -148,7 +148,7 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   group node['gitlab']['git_group']
   mode 0644
   variables(
-    :public_key => node['gitlab']['public_key']
+      :public_key => node['gitlab']['public_key']
   )
   not_if { File.exists?("#{node['gitlab']['git_home']}/gitlab.pub") }
 end
@@ -160,8 +160,8 @@ template "#{node['gitlab']['home']}/.ssh/config" do
   group node['gitlab']['group']
   mode 0644
   variables(
-    :fqdn => node['fqdn'],
-    :trust_local_sshkeys => node['gitlab']['trust_local_sshkeys']
+      :fqdn => node['fqdn'],
+      :trust_local_sshkeys => node['gitlab']['trust_local_sshkeys']
   )
 end
 
@@ -191,29 +191,36 @@ directory "#{node['gitlab']['app_home']}/tmp" do
   action :create
 end
 
+directory "#{node['gitlab']['app_home']}/tmp" do
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  mode "0755"
+  action :create
+end
+
 # Render gitlab config file
 template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode 0644
   variables(
-    :fqdn => node['fqdn'],
-    :https_boolean => node['gitlab']['https'],
-    :git_user => node['gitlab']['git_user'],
-    :git_home => node['gitlab']['git_home'],
-    :backup_path => node['gitlab']['backup_path'],
-    :backup_keep_time => node['gitlab']['backup_keep_time']
+      :fqdn => node['fqdn'],
+      :https_boolean => node['gitlab']['https'],
+      :git_user => node['gitlab']['git_user'],
+      :git_home => node['gitlab']['git_home'],
+      :backup_path => node['gitlab']['backup_path'],
+      :backup_keep_time => node['gitlab']['backup_keep_time']
   )
 end
 
 # Setup the database
 case node['gitlab']['database']['type']
-when 'mysql'
-  include_recipe 'gitlab::mysql'
-when 'postgres'
-  include_recipe 'gitlab::postgres'
-else
-  Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
+  when 'mysql'
+    include_recipe 'gitlab::mysql'
+  when 'postgres'
+    include_recipe 'gitlab::postgres'
+  else
+    Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
 end
 
 # Create the backup directory
@@ -246,13 +253,13 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-    :adapter  => node['gitlab']['database']['adapter'],
-    :encoding => node['gitlab']['database']['encoding'],
-    :host     => node['gitlab']['database']['host'],
-    :database => node['gitlab']['database']['database'],
-    :pool     => node['gitlab']['database']['pool'],
-    :username => node['gitlab']['database']['username'],
-    :password => node['gitlab']['database']['password']
+      :adapter  => node['gitlab']['database']['adapter'],
+      :encoding => node['gitlab']['database']['encoding'],
+      :host     => node['gitlab']['database']['host'],
+      :database => node['gitlab']['database']['database'],
+      :pool     => node['gitlab']['database']['pool'],
+      :username => node['gitlab']['database']['username'],
+      :password => node['gitlab']['database']['password']
   )
 end
 
@@ -282,8 +289,8 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   group node['gitlab']['group']
   mode 0644
   variables(
-    :fqdn => node['fqdn'],
-    :gitlab_app_home => node['gitlab']['app_home']
+      :fqdn => node['fqdn'],
+      :gitlab_app_home => node['gitlab']['app_home']
   )
 end
 
@@ -294,8 +301,8 @@ template "/etc/init.d/unicorn_rails" do
   mode 0755
   source "unicorn_rails.init.erb"
   variables(
-    :fqdn => node['fqdn'],
-    :gitlab_app_home => node['gitlab']['app_home']
+      :fqdn => node['fqdn'],
+      :gitlab_app_home => node['gitlab']['app_home']
   )
 end
 
@@ -312,7 +319,7 @@ bash "Create SSL key" do
   code <<-EOF
 umask 077
 openssl genrsa 2048 > #{node['gitlab']['ssl_certificate_key']}
-EOF
+  EOF
 end
 
 bash "Create SSL certificate" do
@@ -329,10 +336,10 @@ template "/etc/nginx/conf.d/default.conf" do
   source "nginx.default.conf.erb"
   notifies :restart, "service[nginx]"
   variables(
-    :hostname => node['hostname'],
-    :gitlab_app_home => node['gitlab']['app_home'],
-    :https_boolean => node['gitlab']['https'],
-    :ssl_certificate => node['gitlab']['ssl_certificate'],
-    :ssl_certificate_key => node['gitlab']['ssl_certificate_key']
+      :hostname => node['hostname'],
+      :gitlab_app_home => node['gitlab']['app_home'],
+      :https_boolean => node['gitlab']['https'],
+      :ssl_certificate => node['gitlab']['ssl_certificate'],
+      :ssl_certificate_key => node['gitlab']['ssl_certificate_key']
   )
 end
