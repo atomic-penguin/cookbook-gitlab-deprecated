@@ -224,6 +224,21 @@ directory node['gitlab']['backup_path'] do
   action :create
 end
 
+directory '/var/gitlab/gitlab/tmp/pids/' do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 00755
+  action :create
+end
+
+file "#{node['gitlab']['app_home']}/.gitlab-setup" do
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  mode 00755
+  action :create
+  not_if { File.exists?("#{node['gitlab']['app_home']}/.gitlab-setup") }
+end
+
 # Write the database.yml
 template "#{node['gitlab']['app_home']}/config/database.yml" do
   source 'database.yml.erb'
@@ -255,11 +270,10 @@ end
 
 # Setup sqlite database for Gitlab
 execute "gitlab-bundle-rake" do
-  command "echo yes | RAILS_ENV=production bundle exec rake gitlab:setup && touch .gitlab-setup"
+  command "RAILS_ENV=production bundle exec rake sidekiq:start && echo yes | RAILS_ENV=production bundle exec rake gitlab:setup"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
-  not_if { File.exists?("#{node['gitlab']['app_home']}/.gitlab-setup") }
 end
 
 # Render unicorn template
