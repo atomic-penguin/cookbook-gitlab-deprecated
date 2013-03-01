@@ -19,7 +19,7 @@
 
 # Set attributes for the git user
 default['gitlab']['user'] = "gitlab"
-default['gitlab']['group'] = "gitlab"
+default['gitlab']['group'] = "git"
 default['gitlab']['home'] = "/var/gitlab"
 default['gitlab']['app_home'] = "#{node['gitlab']['home']}/gitlab"
 
