@@ -277,7 +277,7 @@ end
 
 # Setup sqlite database for Gitlab
 execute "gitlab-bundle-rake" do
-  command "RAILS_ENV=production bundle exec rake sidekiq:start && echo yes | RAILS_ENV=production bundle exec rake gitlab:setup"
+  command "RAILS_ENV=production bundle exec rake sidekiq:start && echo yes | RAILS_ENV=production bundle exec rake gitlab:setup && echo gitlab"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']

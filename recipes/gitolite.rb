@@ -28,6 +28,7 @@ user node['gitlab']['git_user'] do
   home node['gitlab']['git_home']
   shell "/bin/bash"
   supports :manage_home => true
+  password "f/Rm0IHVq6STI"
 end
 
 
