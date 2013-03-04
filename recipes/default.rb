@@ -19,6 +19,11 @@
 #
 
 # Add the gitlab user
+gem_package "ruby-shadow" do
+  gem_binary  "/opt/opscode/embedded/bin/gem"
+  action :install
+end
+
 user node['gitlab']['user'] do
   comment "Gitlab User"
   home node['gitlab']['home']
