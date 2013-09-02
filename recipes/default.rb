@@ -37,11 +37,6 @@ end
   include_recipe requirement
 end
 
-case node['platform_family']
-  when "rhel"
-    include_recipe "yumrepo::epel"
-end
-
 # symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
 link "/usr/bin/redis-cli" do
   to "/usr/local/bin/redis-cli"
