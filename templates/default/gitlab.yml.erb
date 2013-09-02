@@ -7,7 +7,7 @@
 gitlab:
   ## Web server settings
   host: <%= @fqdn %>
-  port: <%= @https_boolean ? 443 : 80 %>
+  port: <%= @port %>
   https: <%= @https_boolean %>
   # Uncomment and customize to run in non-root path
   # Note that ENV['RAILS_RELATIVE_URL_ROOT'] in config/unicorn.rb may need to be changed

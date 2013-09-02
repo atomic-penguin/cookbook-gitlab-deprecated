@@ -45,7 +45,7 @@ case node['platform']
     ruby1.9.1 ruby1.9.1-dev ri1.9.1 libruby1.9.1
     curl wget checkinstall libxslt-dev libsqlite3-dev
     libcurl4-openssl-dev libssl-dev libmysql++-dev
-    libicu-dev libc6-dev libyaml-dev nginx python python-dev
+    libicu-dev libc6-dev libyaml-dev python python-dev
   }
   when "redhat","centos","amazon","scientific"
     case node['platform_version'].to_i
@@ -53,13 +53,13 @@ case node['platform']
         default['gitlab']['packages'] = %w{
       curl wget libxslt-devel sqlite-devel openssl-devel
       mysql++-devel libicu-devel glibc-devel libyaml-devel
-      nginx python26 python26-devel
+      python26 python26-devel
     }
       when 6
         default['gitlab']['packages'] = %w{
       curl wget libxslt-devel sqlite-devel openssl-devel
       mysql++-devel libicu-devel glibc-devel
-      libyaml-devel nginx python python-devel
+      libyaml-devel python python-devel
     }
     end
   else
@@ -67,7 +67,7 @@ case node['platform']
     ruby1.9.1 ruby1.9.1-dev ri1.9.1 libruby1.9.1
     curl wget checkinstall libxslt-dev libsqlite3-dev
     libcurl4-openssl-dev libssl-dev libmysql++-dev
-    libicu-dev libc6-dev libyaml-dev nginx python
+    libicu-dev libc6-dev libyaml-dev python
     python-dev
   }
 end
@@ -89,3 +89,7 @@ default['gitlab']['ssl_req'] = "/C=US/ST=Several/L=Locality/O=Example/OU=Operati
 
 default['gitlab']['backup_path'] = node['gitlab']['app_home'] + "/backups"
 default['gitlab']['backup_keep_time'] = 604800
+
+# Ip and port nginx will be serving requests on
+default['gitlab']['listen_ip'] = "*"
+default['gitlab']['listen_port'] = nil
