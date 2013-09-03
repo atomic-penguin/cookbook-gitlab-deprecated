@@ -18,21 +18,27 @@
 # limitations under the License.
 
 # Set attributes for the git user
-default['gitlab']['user'] = "gitlab"
+default['gitlab']['user'] = "git"
 default['gitlab']['group'] = "git"
-default['gitlab']['home'] = "/var/gitlab"
-default['gitlab']['app_home'] = "#{node['gitlab']['home']}/gitlab"
+default['gitlab']['home'] = "/home/git"
+default['gitlab']['app_home'] = default['gitlab']['home'] + '/gitlab'
 default['gitlab']['web_fqdn'] = nil
-default['gitlab']['gitolite_host'] = nil
+default['gitlab']['email_from'] = "gitlab@example.com"
+default['gitlab']['support_email'] = "support@example.com"
 
 # Set github URL for gitlab
-default['gitlab']['gitlab_url'] = "git://github.com/gitlabhq/gitlabhq.git"
-default['gitlab']['gitlab_branch'] = "4-2-stable"
+default['gitlab']['git_url'] = "git://github.com/gitlabhq/gitlabhq.git"
+default['gitlab']['git_branch'] = "6-0-stable"
+
+# gitlab-shell attributes
+default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
+default['gitlab']['shell']['git_url'] = "git://github.com/gitlabhq/gitlab-shell.git"
+default['gitlab']['shell']['git_branch'] = "v1.7.1"
 
 # Database setup
 default['gitlab']['database']['type'] = "mysql"
-default['gitlab']['database']['adapter'] = default['gitlab']['database']['type'] == "mysql" ? "mysql2" : "postgresql"
-default['gitlab']['database']['encoding'] = default['gitlab']['database']['type'] == "mysql" ? "utf8" : "unicode"
+default['gitlab']['database']['adapter'] = node['gitlab']['database']['type'] == "mysql" ? "mysql2" : "postgresql"
+default['gitlab']['database']['encoding'] = node['gitlab']['database']['type'] == "mysql" ? "utf8" : "unicode"
 default['gitlab']['database']['host'] = "localhost"
 default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = "gitlab"
@@ -42,10 +48,11 @@ default['gitlab']['database']['username'] = "gitlab"
 case node['platform']
   when "ubuntu","debian"
     default['gitlab']['packages'] = %w{
-    ruby1.9.1 ruby1.9.1-dev ri1.9.1 libruby1.9.1
-    curl wget checkinstall libxslt-dev libsqlite3-dev
-    libcurl4-openssl-dev libssl-dev libmysql++-dev
-    libicu-dev libc6-dev libyaml-dev python python-dev
+    build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
+    libreadline-dev libncurses5-dev libffi-dev curl git-core
+    openssh-server redis-server checkinstall libxml2-dev libxslt-dev
+    libcurl4-openssl-dev libicu-dev wget python2.7 python-docutils
+    ruby1.9.1 ruby1.9.1-dev
   }
   when "redhat","centos","amazon","scientific"
     case node['platform_version'].to_i
@@ -64,15 +71,12 @@ case node['platform']
     end
   else
     default['gitlab']['packages'] = %w{
-    ruby1.9.1 ruby1.9.1-dev ri1.9.1 libruby1.9.1
     curl wget checkinstall libxslt-dev libsqlite3-dev
     libcurl4-openssl-dev libssl-dev libmysql++-dev
     libicu-dev libc6-dev libyaml-dev python
-    python-dev
+    python-dev ruby1.9.1 ruby1.9.1-dev
   }
 end
-
-default['gitlab']['trust_local_sshkeys'] = "yes"
 
 # Problems deploying this on RedHat provided rubies.
 case node['platform']
@@ -81,6 +85,8 @@ case node['platform']
   else
     default['gitlab']['install_ruby'] = "package"
 end
+
+default['gitlab']['trust_local_sshkeys'] = "yes"
 
 default['gitlab']['https'] = false
 default['gitlab']['ssl_certificate'] = "/etc/nginx/#{node['fqdn']}.crt"
