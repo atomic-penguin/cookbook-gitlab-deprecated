@@ -1,0 +1,41 @@
+---
+driver_plugin: vagrant 
+driver_config:
+  require_chef_omnibus: latest
+  customize:
+    memory: 1024
+  network:
+  - ["forwarded_port", {guest: 80, host: 8080}]
+
+platforms:
+- name: ubuntu-13.04
+  run_list:
+  - recipe[apt]
+- name: ubuntu-12.04 
+  run_list:
+  - recipe[apt]
+- name: ubuntu-12.04
+  run_list:
+  - recipe[apt]
+- name: centos-6.4
+- name: centos-5.9
+
+suites:
+- name: default
+  run_list: ["recipe[mysql::server]", "recipe[gitlab]"]
+  attributes:
+    build_essential:
+      compiletime: false
+    mysql:
+      server_debian_password: test
+      server_backup_password: test
+      server_root_password: test
+      server_repl_password: test
+    gitlab:
+      database:
+        password: test
+    authorization:
+      sudo:
+        groups:
+        - sudo
+        - wheel

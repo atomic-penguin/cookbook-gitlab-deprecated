@@ -1,1 +1,4 @@
 metadata.json
+*.lock
+.kitchen/
+.kitchen.local.yml
