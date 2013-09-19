@@ -240,7 +240,6 @@ template "/etc/init.d/gitlab" do
   mode 0755
   source "gitlab.init.erb"
   variables(
-      :fqdn => node['fqdn'],
       :gitlab_app_home => node['gitlab']['app_home'],
       :gitlab_user => node['gitlab']['user']
   )
