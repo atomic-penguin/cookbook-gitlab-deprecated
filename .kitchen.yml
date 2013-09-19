@@ -4,28 +4,37 @@ driver_config:
   require_chef_omnibus: latest
   customize:
     memory: 1024
-  network:
-  - ["forwarded_port", {guest: 80, host: 8080}]
 
 platforms:
 - name: ubuntu-13.04
-  run_list:
-  - recipe[apt]
-- name: ubuntu-12.04 
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8080}]
   run_list:
   - recipe[apt]
 - name: ubuntu-12.04
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8081}]
+  run_list:
+  - recipe[apt]
+- name: ubuntu-10.04
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8082}]
   run_list:
   - recipe[apt]
 - name: centos-6.4
-- name: centos-5.9
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8083}]
+  run_list:
+  - recipe[yum::epel]
 
 suites:
 - name: default
   run_list: ["recipe[mysql::server]", "recipe[gitlab]"]
   attributes:
-    build_essential:
-      compiletime: false
     mysql:
       server_debian_password: test
       server_backup_password: test
