@@ -57,5 +57,6 @@ end
 mysql_database_user database_user do
   connection      database_connection
   database_name   database
+  privileges [ "SELECT", "LOCK TABLES", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "INDEX", "ALTER" ]
   action          :grant
 end

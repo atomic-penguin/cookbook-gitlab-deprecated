@@ -3,7 +3,7 @@ driver_plugin: vagrant
 driver_config:
   require_chef_omnibus: latest
   customize:
-    memory: 1024
+    memory: 1024 
 
 platforms:
 - name: ubuntu-13.04
@@ -33,6 +33,8 @@ platforms:
 
 suites:
 - name: default
+  data_bag_path: "test/integration/default/data_bags"
+  encrypted_data_bag_secret_key_path: "test/integration/default/encrypted_data_bag_secret"
   run_list: ["recipe[mysql::server]", "recipe[gitlab]"]
   attributes:
     mysql:
@@ -41,6 +43,9 @@ suites:
       server_root_password: test
       server_repl_password: test
     gitlab:
+      https: true
+      certificate:
+        databag_id: test
       database:
         password: test
     authorization:
