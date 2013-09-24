@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source 'http://rubygems.org'
 
 gem 'berkshelf', '~> 2.0'
 gem 'test-kitchen', git: 'git://github.com/opscode/test-kitchen.git', branch: 'master'

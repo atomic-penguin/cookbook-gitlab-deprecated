@@ -45,11 +45,11 @@ default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = "gitlab"
 default['gitlab']['database']['username'] = "gitlab"
 
-default['gitlab']['install_ruby'] = "2.0.0-p247"
+default['gitlab']['install_ruby'] = "1.9.3-p448"
 default['gitlab']['cookbook_dependencies'] = %w[
   build-essential zlib readline ncurses git openssh
   redisio::install redisio::enable xml python::package python::pip
-  ruby_build sudo postfix nginx
+  ruby_build sudo
 ]
 
 # Required packages for Gitlab
@@ -57,33 +57,33 @@ case node['platform_family']
 when 'debian'
   default['gitlab']['packages'] = %w[
     libyaml-dev libssl-dev libgdbm-dev libffi-dev checkinstall
-    curl libcurl4-openssl-dev libicu-dev wget
+    curl libcurl4-openssl-dev libicu-dev wget python-docutils
   ]
 when "rhel"
   default['gitlab']['packages'] = %w[
     libyaml-devel openssl-devel gdbm-devel libffi-devel
-    curl libcurl-devel libicu-devel wget
+    curl libcurl-devel libicu-devel wget python-docutils
   ]
 else
   default['gitlab']['install_ruby'] = "package"
   default['gitlab']['cookbook_dependencies'] = %w[
-    build-essential git openssh readline xml zlib sudo ruby_build nginx
+    build-essential git openssh readline xml zlib sudo ruby_build
     python::package python::pip redisio::install redisio::enable
   ]
   default['gitlab']['packages'] = %w[
     build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
     libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
     redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev
-    libicu-dev
+    libicu-dev python-docutils
   ]
 end
 
 default['gitlab']['trust_local_sshkeys'] = "yes"
 
 default['gitlab']['https'] = false
-default['gitlab']['ssl_certificate'] = "/etc/nginx/#{node['fqdn']}.crt"
-default['gitlab']['ssl_certificate_key'] = "/etc/nginx/#{node['fqdn']}.key"
-default['gitlab']['ssl_req'] = "/C=US/ST=Several/L=Locality/O=Example/OU=Operations/CN=#{node['fqdn']}/emailAddress=root@localhost"
+default['gitlab']['certificate']['databag_id'] = nil
+default['gitlab']['ssl_certificate'] = "/etc/nginx/ssl/certs/#{node['fqdn']}.pem"
+default['gitlab']['ssl_certificate_key'] = "/etc/nginx/ssl/private/#{node['fqdn']}.key"
 
 default['gitlab']['backup_path'] = node['gitlab']['app_home'] + "/backups"
 default['gitlab']['backup_keep_time'] = 604800
