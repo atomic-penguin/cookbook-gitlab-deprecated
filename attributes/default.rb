@@ -24,6 +24,7 @@ default['gitlab']['group'] = "git"
 default['gitlab']['home'] = "/srv/git"
 default['gitlab']['app_home'] = default['gitlab']['home'] + '/gitlab'
 default['gitlab']['web_fqdn'] = nil
+default['gitlab']['nginx_server_names'] = [ 'gitlab.*', node['fqdn'] ]
 default['gitlab']['email_from'] = "gitlab@#{node['domain']}"
 default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
 
@@ -81,7 +82,7 @@ end
 default['gitlab']['trust_local_sshkeys'] = "yes"
 
 default['gitlab']['https'] = false
-default['gitlab']['certificate']['databag_id'] = nil
+default['gitlab']['certificate_databag_id'] = nil
 default['gitlab']['ssl_certificate'] = "/etc/nginx/ssl/certs/#{node['fqdn']}.pem"
 default['gitlab']['ssl_certificate_key'] = "/etc/nginx/ssl/private/#{node['fqdn']}.key"
 

@@ -1,3 +1,19 @@
+## v6.1.0
+
+Clean up some of the code to target [6-1-stable branch](https://github.com/gitlabhq/gitlabhq/blob/6-1-stable/doc/install/installation.md)
+
+* Move gitlab.home to /srv/git - [FHS 2.3](http://www.pathname.com/fhs/pub/fhs-2.3.html)
+* Use ruby_build to compile 1.9.3 by default per gitlabhq documentation.
+* Clean up both cookbook and package dependencies.
+* Remove ruby-shadow, included in Omnibus, not needed anyway as no
+  password is set.
+* Use gitconfig template, instead of execute.
+* Add test-kitchen skeleton, and certificate data_bag integration.
+  - Add gitlab.certificate_databag_id to deploy certificate from encrypted databag.
+* Minor sudo fix in gitlab init script.
+* Use nginx_site definition to disable default nginx site.
+* Add nginx_server_names array for hostname match precedence over potential default sites matching `_`.
+
 ## v0.5.0
 
 * Database back-end changes via @sethvargo

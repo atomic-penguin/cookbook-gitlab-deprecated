@@ -41,7 +41,7 @@ link "/usr/bin/redis-cli" do
 end
 
 # The recommended Ruby is >= 1.9.3 
-# We'll use Fletcher Nichol's slick ruby_build cookbook to compile a Ruby.
+# We'll use Fletcher Nichol's ruby_build cookbook to compile a Ruby.
 if node['gitlab']['install_ruby'] !~ /package/
   # build ruby
   ruby_build_ruby node['gitlab']['install_ruby']
@@ -264,27 +264,29 @@ template "/etc/init.d/gitlab" do
 end
 
 # Use certificate cookbook for keys
-certificate_manage node['gitlab']['certificate']['databag_id'] do
+certificate_manage node['gitlab']['certificate_databag_id'] do
   cert_path '/etc/nginx/ssl'
   owner node['gitlab']['user']
   group node['gitlab']['user']
   nginx_cert true
-  only_if { node['gitlab']['https'] and not node['gitlab']['certificate']['databag_id'].nil? }
+  only_if { node['gitlab']['https'] and not node['gitlab']['certificate_databag_id'].nil? }
 end
+
+# Create nginx directories before dropping off templates
+include_recipe "nginx::commons_dir"
 
 # Either listen_port has been configured elsewhere or we calculate it depending on the https flag
 listen_port = node['gitlab']['listen_port'] || node['gitlab']['https'] ? 443 : 80
 
-include_recipe "nginx"
-
 # Render and activate nginx default vhost config
-template "/etc/nginx/sites-available/gitlab.conf" do
+template "/etc/nginx/sites-available/gitlab" do
   owner "root"
   group "root"
   mode 0644
-  source "nginx.gitlab.conf.erb"
+  source "nginx.gitlab.erb"
   notifies :restart, "service[nginx]"
   variables(
+      :server_name => node['gitlab']['nginx_server_names'].join(' '),
       :hostname => node['hostname'],
       :gitlab_app_home => node['gitlab']['app_home'],
       :https_boolean => node['gitlab']['https'],
@@ -294,11 +296,13 @@ template "/etc/nginx/sites-available/gitlab.conf" do
   )
 end
 
-nginx_site 'gitlab.conf' do
-  enable true
+include_recipe "nginx"
+
+nginx_site 'gitlab' do
+  enable true 
 end
 
-nginx_site 'default' do
+nginx_site "default" do
   enable false
 end
 
