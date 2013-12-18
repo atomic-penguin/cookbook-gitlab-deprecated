@@ -50,7 +50,7 @@ end
 mysql_database_user database_user do
   connection      database_connection
   password        database_password
-  userhost        database_userhost
+  host            database_userhost
   database_name   database
   action          :create
 end
