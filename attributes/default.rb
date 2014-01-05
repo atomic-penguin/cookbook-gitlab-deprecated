@@ -84,6 +84,7 @@ default['gitlab']['trust_local_sshkeys'] = "yes"
 
 default['gitlab']['https'] = false
 default['gitlab']['certificate_databag_id'] = nil
+default['gitlab']['self_signed_cert'] = false
 default['gitlab']['ssl_certificate'] = "/etc/nginx/ssl/certs/#{node['fqdn']}.pem"
 default['gitlab']['ssl_certificate_key'] = "/etc/nginx/ssl/private/#{node['fqdn']}.key"
 

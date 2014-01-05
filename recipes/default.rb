@@ -130,6 +130,9 @@ git node['gitlab']['shell']['home'] do
   group node['gitlab']['group']
 end
 
+# Either listen_port has been configured elsewhere or we calculate it depending on the https flag
+listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
+
 # render gitlab-shell config
 template node['gitlab']['shell']['home'] + "/config.yml" do
   owner node['gitlab']['user']
@@ -137,7 +140,8 @@ template node['gitlab']['shell']['home'] + "/config.yml" do
   mode 0644
   source "shell_config.yml.erb"
   variables(
-      :fqdn => node['gitlab']['web_fqdn'] || node['fqdn']
+      :fqdn => node['gitlab']['web_fqdn'] || node['fqdn'],
+      :listen => listen_port
   )
 end
 
@@ -274,9 +278,6 @@ end
 
 # Create nginx directories before dropping off templates
 include_recipe "nginx::commons_dir"
-
-# Either listen_port has been configured elsewhere or we calculate it depending on the https flag
-listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
 
 # Render and activate nginx default vhost config
 template "/etc/nginx/sites-available/gitlab" do
