@@ -10,7 +10,7 @@ version          "6.1.10"
     postgresql apt ].each do |cb_depend|
   depends cb_depend
 end
-depends "yum", "< 3.0.0"
+depends "yum"
 
 %w[ redhat centos scientific amazon debian ubuntu ].each do |os|
   supports os
