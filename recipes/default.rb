@@ -276,7 +276,7 @@ end
 include_recipe "nginx::commons_dir"
 
 # Either listen_port has been configured elsewhere or we calculate it depending on the https flag
-listen_port = node['gitlab']['listen_port'] || node['gitlab']['https'] ? 443 : 80
+listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
 
 # Render and activate nginx default vhost config
 template "/etc/nginx/sites-available/gitlab" do
