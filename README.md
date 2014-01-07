@@ -146,6 +146,10 @@ is calculated.
   - The host (fqdn) where the database exists
   - Default `localhost`
 
+* gitlab['database']['userhost']
+  - The host (fqdn) from which the database user may connect.
+  - Default `localhost`
+
 * gitlab['database']['pool']
   - The maximum number of connections to allow
   - Default 5
