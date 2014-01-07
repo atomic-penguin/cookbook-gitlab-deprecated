@@ -1,6 +1,8 @@
 ## v6.1.x
 
   * Add node['database']['userhost'] attribute, fixes #57
+  * Fix gitlab['listen_port']/gitlab['https'] condition, fixes #58
+  * Add node['gitlab']['self_signed_cert'] and documentation, fixes #58
 
 ## v6.1.10
 

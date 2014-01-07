@@ -87,7 +87,10 @@ Attributes
     a role to override the `gitlab['packages']` array.
 
 * `gitlab['https']`
-  - Whether https should be used, default false
+  - Whether https should be used. Default false
+
+* `gitlab['self_signed_cert']`
+  - Allows self-signed certificates over https protocol. Default false
 
 * `gitlab['certificate_databag_id']`
   - Encrypted databag name containing certificate file, CA bundle, and key. Default nil

@@ -37,7 +37,7 @@ case node['gitlab']['database']['type']
 end
 
 # Install the required packages via cookbook
-node['gitlab']['cookbook_dependencies'].each do |requirement|  
+node['gitlab']['cookbook_dependencies'].each do |requirement|
   include_recipe requirement
 end
 
