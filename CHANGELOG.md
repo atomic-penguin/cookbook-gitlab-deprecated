@@ -1,3 +1,7 @@
+## v6.1.x
+
+  * Add node['database']['userhost'] attribute, fixes #57
+
 ## v6.1.10
 
 Bugs squashed:
