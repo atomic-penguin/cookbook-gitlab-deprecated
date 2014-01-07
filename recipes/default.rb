@@ -25,15 +25,14 @@ when 'rhel'
   include_recipe 'yum::epel'
 end
 
-
 # Setup the database
 case node['gitlab']['database']['type']
-  when 'mysql'
-    include_recipe 'gitlab::mysql'
-  when 'postgres'
-    include_recipe 'gitlab::postgres'
-  else
-    Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
+when 'mysql'
+  include_recipe 'gitlab::mysql'
+when 'postgres'
+  include_recipe 'gitlab::postgres'
+else
+  Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
 end
 
 # Install the required packages via cookbook
@@ -47,54 +46,54 @@ node['gitlab']['packages'].each do |pkg|
 end
 
 # symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
-link "/usr/bin/redis-cli" do
-  to "/usr/local/bin/redis-cli"
+link '/usr/bin/redis-cli' do
+  to '/usr/local/bin/redis-cli'
 end
 
 # Add a git user for Gitlab
 user node['gitlab']['user'] do
-  comment "Gitlab User"
+  comment 'Gitlab User'
   home node['gitlab']['home']
-  shell "/bin/bash"
-  supports :manage_home => true
+  shell '/bin/bash'
+  supports manage_home: true
 end
 
 # Fix home permissions for nginx
 directory node['gitlab']['home'] do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0755
+  mode '0755'
 end
 
 # Create a $HOME/.ssh folder
 directory "#{node['gitlab']['home']}/.ssh" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0700
+  mode '0700'
 end
 
 template "#{node['gitlab']['home']}/.gitconfig" do
-  source "gitconfig.erb"
+  source 'gitconfig.erb'
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0644
+  mode '0644'
 end
 
 # Configure gitlab user to auto-accept localhost SSH keys
 template "#{node['gitlab']['home']}/.ssh/config" do
-  source "ssh_config.erb"
+  source 'ssh_config.erb'
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0644
+  mode '0644'
   variables(
-      :fqdn => node['fqdn'],
-      :trust_local_sshkeys => node['gitlab']['trust_local_sshkeys']
+      fqdn: node['fqdn'],
+      trust_local_sshkeys: node['gitlab']['trust_local_sshkeys']
   )
 end
 
-# The recommended Ruby is >= 1.9.3 
+# The recommended Ruby is >= 1.9.3
 # We'll use Fletcher Nichol's ruby_build cookbook to compile a Ruby.
-if node['gitlab']['install_ruby'] !~ /package/ 
+if node['gitlab']['install_ruby'] !~ /package/
   ruby_build_ruby node['gitlab']['install_ruby'] do
     prefix_path node['gitlab']['install_ruby_path']
     user node['gitlab']['user']
@@ -102,20 +101,20 @@ if node['gitlab']['install_ruby'] !~ /package/
   end
 
   # Install required Ruby Gems for Gitlab with ~git/bin/gem
-  %w[ charlock_holmes bundler ].each do |gempkg|
+  %w[charlock_holmes bundler].each do |gempkg|
     gem_package gempkg do
       gem_binary "#{node['gitlab']['install_ruby_path']}/bin/gem"
       action :install
-      options("--no-ri --no-rdoc")
+      options('--no-ri --no-rdoc')
     end
   end
 else
 # Install required Ruby Gems for Gitlab with system gem
-  %w[ charlock_holmes bundler ].each do |gempkg|
+  %w[charlock_holmes bundler].each do |gempkg|
     gem_package gempkg do
       gem_binary "#{node['gitlab']['install_ruby_path']}/bin/gem"
       action :install
-      options("--no-ri --no-rdoc")
+      options('--no-ri --no-rdoc')
     end
   end
 end
@@ -134,14 +133,14 @@ end
 listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
 
 # render gitlab-shell config
-template node['gitlab']['shell']['home'] + "/config.yml" do
+template node['gitlab']['shell']['home'] + '/config.yml' do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0644
-  source "shell_config.yml.erb"
+  mode '0644'
+  source 'shell_config.yml.erb'
   variables(
-      :fqdn => node['gitlab']['web_fqdn'] || node['fqdn'],
-      :listen => listen_port
+      fqdn: node['gitlab']['web_fqdn'] || node['fqdn'],
+      listen: listen_port
   )
 end
 
@@ -161,13 +160,13 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-      :adapter  => node['gitlab']['database']['adapter'],
-      :encoding => node['gitlab']['database']['encoding'],
-      :host     => node['gitlab']['database']['host'],
-      :database => node['gitlab']['database']['database'],
-      :pool     => node['gitlab']['database']['pool'],
-      :username => node['gitlab']['database']['username'],
-      :password => node['gitlab']['database']['password']
+      adapter: node['gitlab']['database']['adapter'],
+      encoding: node['gitlab']['database']['encoding'],
+      host: node['gitlab']['database']['host'],
+      database: node['gitlab']['database']['database'],
+      pool: node['gitlab']['database']['pool'],
+      username: node['gitlab']['database']['username'],
+      password: node['gitlab']['database']['password']
   )
 end
 
@@ -175,14 +174,14 @@ end
 template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0644
+  mode '0644'
   variables(
-      :fqdn => node['gitlab']['web_fqdn'] || node['fqdn'],
-      :https_boolean => node['gitlab']['https'],
-      :git_user => node['gitlab']['user'],
-      :git_home => node['gitlab']['home'],
-      :backup_path => node['gitlab']['backup_path'],
-      :backup_keep_time => node['gitlab']['backup_keep_time']
+      fqdn: node['gitlab']['web_fqdn'] || node['fqdn'],
+      https_boolean: node['gitlab']['https'],
+      git_user: node['gitlab']['user'],
+      git_home: node['gitlab']['home'],
+      backup_path: node['gitlab']['backup_path'],
+      backup_keep_time: node['gitlab']['backup_keep_time']
   )
 end
 
@@ -191,26 +190,26 @@ end
   directory File.join(node['gitlab']['app_home'], dir) do
     user node['gitlab']['user']
     group node['gitlab']['group']
-    mode "0755"
+    mode '0755'
     recursive true
     action :create
   end
 end
 
 # create gitlab-satellites directory
-directory File.join(node['gitlab']['home'], "gitlab-satellites") do
+directory File.join(node['gitlab']['home'], 'gitlab-satellites') do
   user node['gitlab']['user']
   group node['gitlab']['group']
-  mode "0755"
+  mode '0755'
   recursive true
   action :create
 end
 
 # create repositories directory
-directory File.join(node['gitlab']['home'], "repositories") do
+directory File.join(node['gitlab']['home'], 'repositories') do
   user node['gitlab']['user']
   group node['gitlab']['group']
-  mode "2770"
+  mode '2770'
   recursive true
   action :create
 end
@@ -219,7 +218,7 @@ end
 directory node['gitlab']['backup_path'] do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 00755
+  mode '00755'
   action :create
 end
 
@@ -227,28 +226,28 @@ end
 template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
-  mode 0644
+  mode '0644'
   variables(
-      :fqdn => node['fqdn'],
-      :gitlab_app_home => node['gitlab']['app_home']
+      fqdn: node['fqdn'],
+      gitlab_app_home: node['gitlab']['app_home']
   )
 end
 
 without_group = node['gitlab']['database']['type'] == 'mysql' ? 'postgres' : 'mysql'
 
 # Install Gems with bundle install
-execute "gitlab-bundle-install" do
+execute 'gitlab-bundle-install' do
   command "bundle install --deployment --without development test #{without_group} aws"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
-  environment({ 'LANG' => "en_US.UTF-8", 'LC_ALL' => "en_US.UTF-8" })
+  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
   not_if { File.exists?("#{node['gitlab']['app_home']}/vendor/bundle") }
 end
 
-# Initialize database 
-execute "gitlab-bundle-rake" do
-  command "bundle exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup"
+# Initialize database
+execute 'gitlab-bundle-rake' do
+  command 'bundle exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup'
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
@@ -256,14 +255,14 @@ execute "gitlab-bundle-rake" do
 end
 
 # Render gitlab init script
-template "/etc/init.d/gitlab" do
-  owner "root"
-  group "root"
-  mode 0755
-  source "gitlab.init.erb"
+template '/etc/init.d/gitlab' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  source 'gitlab.init.erb'
   variables(
-      :gitlab_app_home => node['gitlab']['app_home'],
-      :gitlab_user => node['gitlab']['user']
+      gitlab_app_home: node['gitlab']['app_home'],
+      gitlab_user: node['gitlab']['user']
   )
 end
 
@@ -273,41 +272,41 @@ certificate_manage node['gitlab']['certificate_databag_id'] do
   owner node['gitlab']['user']
   group node['gitlab']['user']
   nginx_cert true
-  only_if { node['gitlab']['https'] and not node['gitlab']['certificate_databag_id'].nil? }
+  only_if { node['gitlab']['https'] && !node['gitlab']['certificate_databag_id'].nil? }
 end
 
 # Create nginx directories before dropping off templates
-include_recipe "nginx::commons_dir"
+include_recipe 'nginx::commons_dir'
 
 # Render and activate nginx default vhost config
-template "/etc/nginx/sites-available/gitlab" do
-  owner "root"
-  group "root"
-  mode 0644
-  source "nginx.gitlab.erb"
-  notifies :restart, "service[nginx]"
+template '/etc/nginx/sites-available/gitlab' do
+  owner 'root'
+  group 'root'
+  mode '0644'
+  source 'nginx.gitlab.erb'
+  notifies :restart, 'service[nginx]'
   variables(
-      :server_name => node['gitlab']['nginx_server_names'].join(' '),
-      :hostname => node['hostname'],
-      :gitlab_app_home => node['gitlab']['app_home'],
-      :https_boolean => node['gitlab']['https'],
-      :ssl_certificate => node['gitlab']['ssl_certificate'],
-      :ssl_certificate_key => node['gitlab']['ssl_certificate_key'],
-      :listen => "#{node['gitlab']['listen_ip']}:#{listen_port}"
+      server_name: node['gitlab']['nginx_server_names'].join(' '),
+      hostname: node['hostname'],
+      gitlab_app_home: node['gitlab']['app_home'],
+      https_boolean: node['gitlab']['https'],
+      ssl_certificate: node['gitlab']['ssl_certificate'],
+      ssl_certificate_key: node['gitlab']['ssl_certificate_key'],
+      listen: "#{node['gitlab']['listen_ip']}:#{listen_port}"
   )
 end
 
-include_recipe "nginx"
+include_recipe 'nginx'
 
 nginx_site 'gitlab' do
-  enable true 
+  enable true
 end
 
-nginx_site "default" do
+nginx_site 'default' do
   enable false
 end
 
 # Enable and start unicorn_rails and nginx service
-service "gitlab" do
-  action [ :enable, :start ]
+service 'gitlab' do
+  action [:enable, :start]
 end

@@ -21,7 +21,7 @@ include_recipe 'mysql::ruby'
 # Enable secure password generation
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['gitlab']['database']['password'] = secure_password
-ruby_block "save node data" do
+ruby_block 'save node data' do
   block do
     node.save
   end
@@ -35,9 +35,9 @@ database_password = node['gitlab']['database']['password']
 database_userhost = node['gitlab']['database']['userhost']
 database_host = node['gitlab']['database']['host']
 database_connection = {
-  :host     => database_host,
-  :username => 'root',
-  :password => node['mysql']['server_root_password']
+  host: database_host,
+  username: 'root',
+  password: node['mysql']['server_root_password']
 }
 
 # Create the database
@@ -59,6 +59,6 @@ end
 mysql_database_user database_user do
   connection      database_connection
   database_name   database
-  privileges [ "SELECT", "LOCK TABLES", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "INDEX", "ALTER" ]
+  privileges ['SELECT', 'LOCK TABLES', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'INDEX', 'ALTER']
   action          :grant
 end
