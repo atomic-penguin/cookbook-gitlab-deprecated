@@ -25,8 +25,6 @@ platforms:
     network:
     - ["forwarded_port", {guest: 80, host: 8082}]
     - ["forwarded_port", {guest: 443, host: 8445}]
-  run_list:
-  - recipe[yum::epel]
 
 suites:
 - name: default
