@@ -27,7 +27,14 @@ in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://
 ============
 
 * Hard disk space
-  - About 600 Mb, plus enough space for repositories in application home 
+  - About 600 Mb, plus enough space for repositories in application home
+
+* You need to add `mysql::server` or `postgresql::server` to your run\_list
+  if you intend to run the whole application stack on a single instance.
+  The `gitlab::mysql` and `gitlab::postgresql` recipes set up the RDBMS
+  connection only, to allow for multi-instance architecture.  See
+  `Database Attributes` documentation below for RDBMS connection
+  parameters.
 
 ## Cookbook dependencies
 ============
