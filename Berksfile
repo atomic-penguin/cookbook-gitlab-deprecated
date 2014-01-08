@@ -2,7 +2,7 @@ site :opscode
 
 metadata
 
-cookbook 'yum', '< 3.0.0'
+cookbook 'yum', '<= 2.4.4'
 
 group :integration do
   cookbook 'apt', '~> 2.0'
