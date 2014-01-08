@@ -40,7 +40,6 @@ in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://
 * Opscode, Inc cookbooks
   - [git](http://ckbk.it/git)
   - [build-essential](http://ckbk.it/build-essential)
-  - [python](http://ckbk.it/python)
   - [sudo](http://ckbk.it/sudo)
   - [nginx](http://ckbk.it/nginx)
   - [openssh](http://ckbk.it/openssh)

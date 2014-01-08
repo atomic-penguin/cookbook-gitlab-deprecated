@@ -51,8 +51,7 @@ default['gitlab']['install_ruby'] = '1.9.3-p484'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w[
   build-essential zlib readline ncurses git openssh
-  redisio::install redisio::enable xml python::package python::pip
-  ruby_build
+  redisio::install redisio::enable xml ruby_build
 ]
 
 # Required packages for Gitlab
@@ -71,7 +70,7 @@ else
   default['gitlab']['install_ruby'] = 'package'
   default['gitlab']['cookbook_dependencies'] = %w[
     build-essential git openssh readline xml zlib sudo ruby_build
-    python::package python::pip redisio::install redisio::enable
+    redisio::install redisio::enable
   ]
   default['gitlab']['packages'] = %w[
     build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev

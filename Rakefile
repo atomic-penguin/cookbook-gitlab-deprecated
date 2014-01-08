@@ -1,12 +1,16 @@
 #!/usr/bin/env rake
-require 'rake/testtask'
 
-Rake::TestTask.new do |t|
-  t.libs.push "lib"
-  t.test_files = FileList['test/**/*_spec.rb']
-  t.verbose = true
+# chefspec task against spec/*_spec.rb
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:chefspec)
+
+# rubocop rake task
+desc "Ruby style guide linter"
+task :rubocop do
+  sh "rubocop"
 end
 
+# foodcritic task
 desc "Runs foodcritic linter"
 task :foodcritic do
   if Gem::Version.new("1.9.2") <= Gem::Version.new(RUBY_VERSION.dup)
@@ -16,7 +20,7 @@ task :foodcritic do
   end
 end
 
-task :default => [ 'test', 'foodcritic' ]
+task :default => [ 'foodcritic', 'rubocop', 'chefspec' ]
 
 begin
   require 'kitchen/rake_tasks'
