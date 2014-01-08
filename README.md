@@ -1,4 +1,6 @@
-## Description
+## Gitlab Cookbook
+
+[![Build Status](https://travis-ci.org/atomic-penguin/cookbook-gitlab.png?branch=master)](https://travis-ci.org/atomic-penguin/cookbook-gitlab)
 
 This cookbook will deploy gitlab; a free project and repository management
 application.
@@ -25,7 +27,7 @@ in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://
 ============
 
 * Hard disk space
-  - About 300 Mb, plus enough space for repositories in application home 
+  - About 600 Mb, plus enough space for repositories in application home 
 
 ## Cookbook dependencies
 ============

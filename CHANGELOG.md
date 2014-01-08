@@ -1,9 +1,10 @@
-## v6.1.20
+## v6.1.21
 
   * Add node['database']['userhost'] attribute, fixes #57
   * Fix gitlab['listen_port']/gitlab['https'] condition, fixes #58
   * Add node['gitlab']['self_signed_cert'] and documentation, fixes #58
   * Revert yum-epel changes, COOK-4164 blocking, will re-open
+    - Fix dependency hell w/ nginx cookbook
   * Add rubocop linting
   * Add chefspec mysql/postgres http/https branching specs
   * Remove unneeded python dependency 
