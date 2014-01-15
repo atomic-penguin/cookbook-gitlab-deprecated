@@ -1,3 +1,15 @@
+## v6.4.0
+
+  * Bump gitlab-shell to v1.8.0
+  * Bump gitlab to 6.4.0
+  * Remove stale nginx config file
+  * Default recipe changes
+    - Update gitlab-shell config to point at /usr/local/bin/redis-cli
+    - Fix permissions on .ssh/authorized_keys
+    - Add rack_attack file
+    - Add precompile assets execute
+    - Add logrotate dependency and configuration 
+
 ## v6.1.21
 
   * Add node['database']['userhost'] attribute, fixes #57

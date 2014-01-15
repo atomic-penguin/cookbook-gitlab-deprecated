@@ -30,12 +30,12 @@ default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'git://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '6-1-stable'
+default['gitlab']['git_branch'] = '6-4-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'git://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v1.7.1'
+default['gitlab']['shell']['git_branch'] = 'v1.8.0'
 
 # Database setup
 default['gitlab']['database']['type'] = 'mysql'
@@ -47,11 +47,14 @@ default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
 default['gitlab']['database']['userhost'] = 'localhost'
 
+# Ruby setup
+include_attribute 'ruby_build'
+default['ruby_build']['upgrade'] = 'sync'
 default['gitlab']['install_ruby'] = '1.9.3-p484'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w[
   build-essential zlib readline ncurses git openssh
-  redisio::install redisio::enable xml ruby_build
+  logrotate redisio::install redisio::enable xml ruby_build
 ]
 
 # Required packages for Gitlab

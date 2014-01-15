@@ -45,11 +45,6 @@ node['gitlab']['packages'].each do |pkg|
   package pkg
 end
 
-# symlink redis-cli into /usr/bin (needed for gitlab hooks to work)
-link '/usr/bin/redis-cli' do
-  to '/usr/local/bin/redis-cli'
-end
-
 # Add a git user for Gitlab
 user node['gitlab']['user'] do
   comment 'Gitlab User'
@@ -72,6 +67,13 @@ directory "#{node['gitlab']['home']}/.ssh" do
   mode '0700'
 end
 
+file "#{node['gitlab']['home']}/.ssh/authorized_keys" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0600'
+end
+
+# Drop off git config
 template "#{node['gitlab']['home']}/.gitconfig" do
   source 'gitconfig.erb'
   owner node['gitlab']['user']
@@ -185,6 +187,13 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   )
 end
 
+# Copy file rack_attack.rb
+cookbook_file "#{node['gitlab']['app_home']}/config/initializers/rack_attack.rb" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0644'
+end
+
 # create log, tmp, pids and sockets directory
 %w{ log tmp tmp/pids tmp/sockets public/uploads }.each do |dir|
   directory File.join(node['gitlab']['app_home'], dir) do
@@ -194,6 +203,25 @@ end
     recursive true
     action :create
   end
+end
+
+# Precompile assets
+execute 'gitlab-bundle-precompile-assets' do
+  command 'bundle exec rake assets:precompile RAILS_ENV=production'
+  cwd node['gitlab']['app_home']
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
+  only_if { Dir["#{node['gitlab']['app_home']}/public/assets/*"].empty? }
+end
+
+# logrotate gitlab-shell and gitlab
+logrotate_app 'gitlab' do
+  frequency 'weekly'
+  path ["#{node['gitlab']['app_home']}/log/*.log",
+        "#{node['gitlab']['shell']['home']}/gitlab-shell.log"]
+  rotate 52
+  options %w[compress delaycompress notifempty copytruncate]
 end
 
 # create gitlab-satellites directory
@@ -296,17 +324,20 @@ template '/etc/nginx/sites-available/gitlab' do
   )
 end
 
+# Install nginx
 include_recipe 'nginx'
 
+# Enable gitlab site
 nginx_site 'gitlab' do
   enable true
 end
 
+# Disable default site
 nginx_site 'default' do
   enable false
 end
 
-# Enable and start unicorn_rails and nginx service
+# Enable and start unicorn and sidekiq service
 service 'gitlab' do
   action [:enable, :start]
 end

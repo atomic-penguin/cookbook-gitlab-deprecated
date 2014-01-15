@@ -4,10 +4,10 @@ license          'Apache 2.0'
 description      'Installs/Configures gitlab'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 name             'gitlab'
-version          '6.1.21'
+version          '6.4.0'
 
 %w[ build-essential zlib readline ncurses git openssh redisio xml
-    ruby_build certificate database mysql
+    ruby_build certificate database logrotate mysql nginx
     postgresql apt ].each do |cb_depend|
   depends cb_depend
 end

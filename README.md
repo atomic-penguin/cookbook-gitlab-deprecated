@@ -43,19 +43,20 @@ in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://
   - Thanks to Fletcher Nichol for his awesome ruby\_build cookbook.
     This ruby\_build LWRP is used to build Ruby 1.9.3 for gitlab.
 
-* [redisio](http://ckbk.it/redisio)
+* [redisio](http://community.opscode.com/cookbooks/redisio)
   - Thanks to Brian Bianco for this Redis cookbook.
 
 * Opscode, Inc cookbooks
-  - [git](http://ckbk.it/git)
-  - [build-essential](http://ckbk.it/build-essential)
-  - [sudo](http://ckbk.it/sudo)
-  - [nginx](http://ckbk.it/nginx)
-  - [openssh](http://ckbk.it/openssh)
-  - [perl](http://ckbk.it/perl)
-  - [xml](http://ckbk.it/xml)
-  - [zlib](http://ckbk.it/zlib)
-  - [database](http://ckbk.it/database)
+  - [git](http://community.opscode.com/cookbooks/git)
+  - [build-essential](http://community.opscode.com/cookbooks/build-essential)
+  - [sudo](http://community.opscode.com/cookbooks/sudo)
+  - [nginx](http://community.opscode.com/cookbooks/nginx)
+  - [logrotate](http://community.opscode.com/cookbooks/logrotate)
+  - [openssh](http://community.opscode.com/cookbooks/openssh)
+  - [perl](http://community.opscode.com/cookbooks/perl)
+  - [xml](http://community.opscode.com/cookbooks/xml)
+  - [zlib](http://community.opscode.com/cookbooks/zlib)
+  - [database](http://community.opscode.com/cookbooks/database)
 
 
 Attributes
@@ -102,7 +103,7 @@ Attributes
 
 * `gitlab['certificate_databag_id']`
   - Encrypted databag name containing certificate file, CA bundle, and key. Default nil
-  - See [certificate cookbook](http://ckbk.it/certificate) for further information.
+  - See [certificate cookbook](http://community.opscode.com/cookbooks/certificate) for further information.
 
 * `gitlab['backup_path']`
   - Path in file system where backups are stored. Default `gitlab['app_home'] + backups/`
