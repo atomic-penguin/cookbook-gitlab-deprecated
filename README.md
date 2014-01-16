@@ -5,7 +5,7 @@
 This cookbook will deploy gitlab; a free project and repository management
 application.
 
-Gitlab code hosted on github [here](https://github.com/gitlabhq/gitlabhq/tree/stable).
+Gitlab code hosted on github [here](https://github.com/gitlabhq/gitlabhq).
 
 ## Important changes
 
