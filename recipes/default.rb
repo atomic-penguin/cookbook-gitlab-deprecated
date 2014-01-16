@@ -340,4 +340,5 @@ end
 # Enable and start unicorn and sidekiq service
 service 'gitlab' do
   action [:enable, :start]
+  subscribes :restart, "template[#{node['gitlab']['app_home']}/config/gitlab.yml]", :delayed
 end
