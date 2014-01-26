@@ -205,17 +205,6 @@ end
   end
 end
 
-bundler_binary = "#{node['gitlab']['install_ruby_path']}/bin/bundle"
-# Precompile assets
-execute 'gitlab-bundle-precompile-assets' do
-  command '#{bundler_binary} exec rake assets:precompile RAILS_ENV=production'
-  cwd node['gitlab']['app_home']
-  user node['gitlab']['user']
-  group node['gitlab']['group']
-  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  only_if { Dir["#{node['gitlab']['app_home']}/public/assets/*"].empty? }
-end
-
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
@@ -263,6 +252,8 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
 end
 
 without_group = node['gitlab']['database']['type'] == 'mysql' ? 'postgres' : 'mysql'
+
+bundler_binary = "#{node['gitlab']['install_ruby_path']}/bin/bundle"
 bundle_success = "#{node['gitlab']['app_home']}/vendor/bundle/.success"
 
 # Install Gems with bundle install
@@ -275,9 +266,19 @@ execute 'gitlab-bundle-install' do
   not_if { File.exists?(bundle_success) }
 end
 
+# Precompile assets
+execute 'gitlab-bundle-precompile-assets' do
+  command "#{bundler_binary} exec rake assets:precompile RAILS_ENV=production"
+  cwd node['gitlab']['app_home']
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
+  only_if { Dir["#{node['gitlab']['app_home']}/public/assets/*"].empty? }
+end
+
 # Initialize database
 execute 'gitlab-bundle-rake' do
-  command '#{bundler_binary} exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup'
+  command "#{bundler_binary} exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
