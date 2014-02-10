@@ -31,7 +31,7 @@ default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
 # User default privileges
 default['gitlab']['default_projects_limit'] = 10
 default['gitlab']['default_can_create_group'] = true
-default['gitlab']['username_changing_enabled'] = true 
+default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'git://github.com/gitlabhq/gitlabhq.git'
