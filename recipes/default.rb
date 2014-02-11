@@ -22,10 +22,10 @@ case node['platform_family']
 when 'debian'
   include_recipe 'apt'
 when 'rhel'
-  include_recipe 'yum::epel'
+  include_recipe 'yum-epel'
 end
 
-# Setup the database
+# Setup the database connection
 case node['gitlab']['database']['type']
 when 'mysql'
   include_recipe 'gitlab::mysql'
@@ -141,7 +141,7 @@ template node['gitlab']['shell']['home'] + '/config.yml' do
   mode '0644'
   source 'shell_config.yml.erb'
   variables(
-      fqdn: node['gitlab']['web_fqdn'] || node['fqdn'],
+      fqdn: !node['gitlab']['web_fqdn'].nil? || node['fqdn'],
       listen: listen_port
   )
 end
@@ -153,6 +153,20 @@ git node['gitlab']['app_home'] do
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
+end
+
+# Render gitlab init script
+# This needs to happen before gitlab.yml is rendered.
+# So when the service is subscribed, the init file will be in place
+template '/etc/init.d/gitlab' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+  source 'gitlab.init.erb'
+  variables(
+      gitlab_app_home: node['gitlab']['app_home'],
+      gitlab_user: node['gitlab']['user']
+  )
 end
 
 # Write the database.yml
@@ -283,18 +297,6 @@ execute 'gitlab-bundle-rake' do
   user node['gitlab']['user']
   group node['gitlab']['group']
   not_if { File.exists?("#{node['gitlab']['app_home']}/.gitlab-setup") }
-end
-
-# Render gitlab init script
-template '/etc/init.d/gitlab' do
-  owner 'root'
-  group 'root'
-  mode '0755'
-  source 'gitlab.init.erb'
-  variables(
-      gitlab_app_home: node['gitlab']['app_home'],
-      gitlab_user: node['gitlab']['user']
-  )
 end
 
 # Use certificate cookbook for keys

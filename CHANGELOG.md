@@ -1,4 +1,37 @@
-## v6.4.0
+Gitlab Cookbook Changelog
+=========================
+
+v6.4.1
+------
+
+* Issue #60 - thanks to @nickryand
+  - Modified the bundle install command to drop a file on successful
+    completion 
+  - Added the absolute path to the bundler binary installed into the
+    system ruby path.
+  - Added a more accurate pattern matcher to gitlab service resource
+    so Chef can find unicorn_rails processes instead of finding processes that
+    have the 'gitlab' string in them.
+  - Changed the background call to script/web and script/background_jobs
+    in the startup script.  These are now foreground calls forcing the start
+    script to block until they return (after the processes are up).  This
+    prevents the Chef run from completing before the unicorn_rails processes
+    are up.
+
+* Other fixes/tweaks
+  - Remove yum dependency hell.
+  - Change init/database.yml order due to service subscription.
+  - Add a :80 redirect to :443, avoids default site showing on :80
+    when `gitlab['https']` set.
+
+* Update test files
+  - Pin omnibus version at 11.8.2, redisio remote file resource failure.
+  - Remove explicit nil on databag_certificate_id, fails on default suite 
+  - Remove support Gemfile, and update travis.yml
+  - Add bats tests for default/https suites
+
+v6.4.0
+------
 
   * Bump gitlab-shell to v1.8.0
   * Bump gitlab to 6.4.0
@@ -10,7 +43,8 @@
     - Add precompile assets execute
     - Add logrotate dependency and configuration 
 
-## v6.1.21
+v6.1.21
+-------
 
   * Add node['database']['userhost'] attribute, fixes #57
   * Fix gitlab['listen_port']/gitlab['https'] condition, fixes #58
@@ -21,7 +55,8 @@
   * Add chefspec mysql/postgres http/https branching specs
   * Remove unneeded python dependency 
 
-## v6.1.10
+v6.1.10
+-------
 
 Bugs squashed:
 
@@ -42,7 +77,8 @@ Removed:
 
   * sudo cookbook dependency removed. #52
 
-## v6.1.0
+v6.1.0
+------
 
 Clean up some of the code to target [6-1-stable branch](https://github.com/gitlabhq/gitlabhq/blob/6-1-stable/doc/install/installation.md)
 
@@ -58,7 +94,8 @@ Clean up some of the code to target [6-1-stable branch](https://github.com/gitla
 * Use nginx_site definition to disable default nginx site.
 * Add nginx_server_names array for hostname match precedence over potential default sites matching `_`.
 
-## v0.5.0
+v0.5.0
+------
 
 * Database back-end changes via @sethvargo
   - Adds a mysql and postgresql database creation 
@@ -69,14 +106,16 @@ Clean up some of the code to target [6-1-stable branch](https://github.com/gitla
 
 * Add configurable backup paths to Gitlab configuration via @dscheu
 
-## v0.3.4
+v0.3.4
+------
 
 Fix issues with stable snapshot v3.x
     
 * Avoid installing pg, gem which adds extra dependencies
 * Add change to default gitolite.rc per upgrade instructions
 
-## v0.3.3
+v0.3.3
+------
 
 Issues #9 and #10
 
@@ -88,16 +127,19 @@ guards were added to SSH public key generation code blocks.
 Issue 10: this version fixes one minor dependency bug with EPEL
 dependencies via metadata and inclusion.
 
-## v0.3.2
+v0.3.2
+------
 
 * Default gitlab branch to stable
 
-## v0.3.1
+v0.3.1
+------
 
 * ISSUE 7: public key template fails to render
 * ISSUE 8: unicorn_rails script fails on ruby package platforms 
 
-## v0.3.0
+v0.3.0
+------
 
 * Missing bracket
 * Change single-quote variable to symbol notation
@@ -106,14 +148,16 @@ dependencies via metadata and inclusion.
 * Ubuntu/Debian platform compatibility fixes
 * [FC035](http://acrmp.github.com/foodcritic/#FC035): Template uses node attribute directly
 
-## v0.2.1
+v0.2.1
+------
 
   Thanks to Fletcher Nichol for the feedback and fixes :)
 
   * Add `gitlab_branch` attribute.
   * Fix directory block syntax (do).
 
-## v0.2.0
+v0.2.0
+------
 
   * Epic public release <crowd cheers>
   * Moar testing
@@ -121,9 +165,10 @@ dependencies via metadata and inclusion.
   * Fix unicorn config
   * Fix gitlab home permissions for nginx
 
-## v0.1.0
+v0.1.0
+------
 
-  ### Epic refactor
+  #Epic refactor
 
   * Write long README
   * variable renaming to simplify readability
@@ -135,9 +180,10 @@ dependencies via metadata and inclusion.
   * use system ruby instead of chef-full bundler
   * Re-work dependencies; Prefer ruby_build rubies over Redhat shipped
 
-## v0.0.1 - v0.0.40
+v0.0.1 - v0.0.40
+----------------
 
-  ### Prototyping
+  #Prototyping
 
   Added cookbook dependencies for gitlab/gitolite
   Prototype attributes for gitlab cookbook

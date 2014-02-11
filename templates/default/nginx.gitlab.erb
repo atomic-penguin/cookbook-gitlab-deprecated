@@ -11,7 +11,14 @@ upstream unicorn_rails {
     # server 192.168.0.8:8080 fail_timeout=0;
     # server 192.168.0.9:8080 fail_timeout=0;
 }
+<% if @https_boolean %>
 
+server {
+  listen 80;
+  return 301 https://$host/$request_uri;
+}
+
+<% end %>
 server {
     listen       <%= @listen %>;
     client_max_body_size 4G;
