@@ -227,19 +227,6 @@ end
   end
 end
 
-<<<<<<< HEAD
-=======
-# Precompile assets
-execute 'gitlab-bundle-precompile-assets' do
-  command "PATH=\"#{node['gitlab']['home']}/bin:$PATH\" bundle exec rake assets:precompile RAILS_ENV=production"
-  cwd node['gitlab']['app_home']
-  user node['gitlab']['user']
-  group node['gitlab']['group']
-  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  only_if { Dir["#{node['gitlab']['app_home']}/public/assets/*"].empty? }
-end
-
->>>>>>> New attributes, rubypath in execute, LDAP tips
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
