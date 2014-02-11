@@ -1,6 +1,11 @@
 Gitlab Cookbook Changelog
 =========================
 
+v6.4.2
+------
+
+* Add a profile script shim, so init script can correct Ruby.
+
 v6.4.1
 ------
 

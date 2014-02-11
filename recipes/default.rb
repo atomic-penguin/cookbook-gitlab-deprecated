@@ -155,6 +155,14 @@ git node['gitlab']['app_home'] do
   group node['gitlab']['group']
 end
 
+# Drop off a profile script to be included in init script
+template "#{node['gitlab']['home']}/.profile" do
+  source 'profile_gitlab.sh.erb'
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0755'
+end
+
 # Render gitlab init script
 # This needs to happen before gitlab.yml is rendered.
 # So when the service is subscribed, the init file will be in place
