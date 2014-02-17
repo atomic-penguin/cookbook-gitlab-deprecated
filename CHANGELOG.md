@@ -1,6 +1,14 @@
 Gitlab Cookbook Changelog
 =========================
 
+v6.4.3
+------
+
+* Issue #66, gitlab service needs a priority > 20, on debian platform
+* Issue #69, Correct gitlab_url in gitlab-shell config.yml, add regression tests.
+* Issue #67, soften cookbook dependencies on unknown platforms.
+* Issue #62, Add new user attributes to gitlab.yml, and update documentation.
+
 v6.4.2
 ------
 
