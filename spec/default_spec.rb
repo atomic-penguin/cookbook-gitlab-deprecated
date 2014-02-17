@@ -11,6 +11,7 @@ describe 'gitlab::default' do
       ChefSpec::Runner.new(platform: 'centos', version: 6.4) do |node|
         node.override['gitlab']['database']['type'] = 'mysql'
         node.override['gitlab']['https'] = true
+        node.override['gitlab']['web_fqdn'] = 'gitlab.example.com'
       end.converge(described_recipe)
     end
 
@@ -42,12 +43,21 @@ describe 'gitlab::default' do
     it 'ISSUE #67 includes package sudo' do
       expect(chef_run).to install_package('sudo')
     end
+
+    it 'ISSUE #69 renders gitlab shell config with gitlab_url' do
+      expect(chef_run).to render_file('/srv/git/gitlab-shell/config.yml').with_content(%r{gitlab_url:.*https://gitlab.example.com})
+    end
+
+    it 'ISSUE #69 does not render gitlab shell config with boolean' do
+      expect(chef_run).to_not render_file('/srv/git/gitlab-shell/config.yml').with_content(%r{gitlab_url:.*https://(true|false)})
+    end
   end
 
   context 'on Centos 6.4 with postgres and http' do
     let(:chef_run) do
       ChefSpec::Runner.new(platform: 'centos', version: 6.4) do |node|
         node.override['gitlab']['database']['type'] = 'postgres'
+        node.override['gitlab']['web_fqdn'] = 'gitlab.example.com'
       end.converge(described_recipe)
     end
 
@@ -78,6 +88,14 @@ describe 'gitlab::default' do
 
     it 'ISSUE #67 includes package sudo' do
       expect(chef_run).to install_package('sudo')
+    end
+
+    it 'ISSUE #69 renders gitlab shell config with gitlab_url' do
+      expect(chef_run).to render_file('/srv/git/gitlab-shell/config.yml').with_content(%r{gitlab_url:.*http://gitlab.example.com})
+    end
+
+    it 'ISSUE #69 does not render gitlab shell config with boolean' do
+      expect(chef_run).to_not render_file('/srv/git/gitlab-shell/config.yml').with_content(%r{gitlab_url:.*http://(true|false)})
     end
   end
 end
