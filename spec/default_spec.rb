@@ -34,6 +34,14 @@ describe 'gitlab::default' do
     it 'runs execute without postgres' do
       expect(chef_run).to run_execute(/bundle install --deployment --without.*postgres.*/)
     end
+
+    it 'ISSUE #67 does not include cookbook sudo' do
+      expect(chef_run).to_not include_recipe('sudo')
+    end
+
+    it 'ISSUE #67 includes package sudo' do
+      expect(chef_run).to install_package('sudo')
+    end
   end
 
   context 'on Centos 6.4 with postgres and http' do
@@ -62,6 +70,14 @@ describe 'gitlab::default' do
 
     it 'runs execute without postgres' do
       expect(chef_run).to run_execute(/bundle install --deployment --without.*mysql.*/)
+    end
+
+    it 'ISSUE #67 does not include cookbook sudo' do
+      expect(chef_run).to_not include_recipe('sudo')
+    end
+
+    it 'ISSUE #67 includes package sudo' do
+      expect(chef_run).to install_package('sudo')
     end
   end
 end

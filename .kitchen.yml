@@ -55,8 +55,3 @@ suites:
       certificate_databag_id: test
       database:
         password: test
-    authorization:
-      sudo:
-        groups:
-        - sudo
-        - wheel

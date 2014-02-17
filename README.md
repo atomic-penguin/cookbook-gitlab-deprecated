@@ -49,7 +49,6 @@ in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://
 * Opscode, Inc cookbooks
   - [git](http://community.opscode.com/cookbooks/git)
   - [build-essential](http://community.opscode.com/cookbooks/build-essential)
-  - [sudo](http://community.opscode.com/cookbooks/sudo)
   - [nginx](http://community.opscode.com/cookbooks/nginx)
   - [logrotate](http://community.opscode.com/cookbooks/logrotate)
   - [openssh](http://community.opscode.com/cookbooks/openssh)
