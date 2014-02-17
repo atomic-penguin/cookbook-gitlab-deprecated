@@ -355,6 +355,7 @@ end
 
 # Enable and start unicorn and sidekiq service
 service 'gitlab' do
+  priority 30
   pattern "unicorn_rails master -D -c #{node['gitlab']['app_home']}/config/unicorn.rb"
   action [:enable, :start]
   subscribes :restart, "template[#{node['gitlab']['app_home']}/config/gitlab.yml]", :delayed
