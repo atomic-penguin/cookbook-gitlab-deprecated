@@ -139,16 +139,17 @@ Attributes
 **Note**, This attributes are useful when you want only admins to create projects and groups. And to restrict username changing.
 
 * default['gitlab']['default_projects_limit']
-  - When you create a user it takes this value as his **projects_limit** profile setting. 
+  - When you create a user this value is their `projects_limit` profile setting. 
   - If you put it at 0, regular users can't create repos.
+  - Default, 10.
 
-* default['gitlab']['default_can_create_group'] = true
-  - When you create a user it takes this value as his **can_create_group** profile setting.
-  - Name is pretty explanatory about what it means :)
+* default['gitlab']['default_can_create_group']
+  - When you create a user this value is their `can_create_group` profile setting.
+  - Default, true. 
 
-* default['gitlab']['username_changing_enabled'] = false
-  - Disable users changing his username.
-  - This is **true** on a default gitlab install. 
+* default['gitlab']['username_changing_enabled']
+  - Disable/enable users changing their username.
+  - Default, true. 
 
 ### Database Attributes
 
