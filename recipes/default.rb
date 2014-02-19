@@ -102,6 +102,13 @@ if node['gitlab']['install_ruby'] !~ /package/
     group node['gitlab']['user']
   end
 
+  # This hack put here to reliably find Ruby
+  # cross-platform. Issue #66
+  execute 'update-alternatives-ruby' do
+    command "update-alternatives --install /usr/local/bin/ruby ruby #{node['gitlab']['home']}/bin/ruby 10"
+    not_if { ::File.exists?('/usr/local/bin/ruby') }
+  end
+
   # Install required Ruby Gems for Gitlab with ~git/bin/gem
   %w[charlock_holmes bundler].each do |gempkg|
     gem_package gempkg do
@@ -156,14 +163,6 @@ git node['gitlab']['app_home'] do
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
-end
-
-# Drop off a profile script to be included in init script
-template "#{node['gitlab']['home']}/.profile" do
-  source 'profile_gitlab.sh.erb'
-  owner node['gitlab']['user']
-  group node['gitlab']['group']
-  mode '0755'
 end
 
 # Render gitlab init script
@@ -316,7 +315,8 @@ certificate_manage node['gitlab']['certificate_databag_id'] do
   owner node['gitlab']['user']
   group node['gitlab']['user']
   nginx_cert true
-  only_if { node['gitlab']['https'] && !node['gitlab']['certificate_databag_id'].nil? }
+  not_if { node['gitlab']['certificate_databag_id'].nil? }
+  only_if { node['gitlab']['https'] }
 end
 
 # Create nginx directories before dropping off templates
