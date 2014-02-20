@@ -309,8 +309,10 @@ execute 'gitlab-bundle-rake' do
   not_if { File.exists?("#{node['gitlab']['app_home']}/.gitlab-setup") }
 end
 
-# Use certificate cookbook for keys
-certificate_manage node['gitlab']['certificate_databag_id'] do
+# Use certificate cookbook for keys.
+# Look for `search_id` in data_bag `certificates`
+certificate_manage 'gitlab' do
+  search_id node['gitlab']['certificate_databag_id']
   cert_path '/etc/nginx/ssl'
   owner node['gitlab']['user']
   group node['gitlab']['user']

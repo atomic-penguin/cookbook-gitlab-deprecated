@@ -1,6 +1,11 @@
 Gitlab Cookbook Changelog
 =========================
 
+v6.4.4
+------
+
+* Issue #62, certificate resource does not exist if nil, and used as name attribute.
+
 v6.4.3
 ------
 
