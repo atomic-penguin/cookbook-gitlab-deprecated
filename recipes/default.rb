@@ -105,8 +105,8 @@ if node['gitlab']['install_ruby'] !~ /package/
   # This hack put here to reliably find Ruby
   # cross-platform. Issue #66
   execute 'update-alternatives-ruby' do
-    command "update-alternatives --install /usr/local/bin/ruby ruby #{node['gitlab']['home']}/bin/ruby 10"
-    not_if { ::File.exists?('/usr/local/bin/ruby') }
+    command "update-alternatives --install /usr/bin/ruby ruby #{node['gitlab']['home']}/bin/ruby 10"
+    not_if { ::File.exists?('/usr/bin/ruby') }
   end
 
   # Install required Ruby Gems for Gitlab with ~git/bin/gem

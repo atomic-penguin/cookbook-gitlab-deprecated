@@ -1,6 +1,12 @@
 Gitlab Cookbook Changelog
 =========================
 
+v6.4.5
+------
+
+* Issue #66 regression, update-alternatives hack does not work when install_ruby_path
+  is changed.
+
 v6.4.4
 ------
 
