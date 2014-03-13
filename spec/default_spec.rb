@@ -6,9 +6,9 @@ describe 'gitlab::default' do
     stub_command('git --version >/dev/null').and_return(true)
   end
 
-  context 'on Centos 6.4 with mysql and https' do
+  context 'on Centos 6.5 with mysql and https' do
     let(:chef_run) do
-      ChefSpec::Runner.new(platform: 'centos', version: 6.4) do |node|
+      ChefSpec::Runner.new(platform: 'centos', version: 6.5) do |node|
         node.override['gitlab']['database']['type'] = 'mysql'
         node.override['gitlab']['https'] = true
         node.override['gitlab']['web_fqdn'] = 'gitlab.example.com'
@@ -53,9 +53,9 @@ describe 'gitlab::default' do
     end
   end
 
-  context 'on Centos 6.4 with postgres and http' do
+  context 'on Centos 6.5 with postgres and http' do
     let(:chef_run) do
-      ChefSpec::Runner.new(platform: 'centos', version: 6.4) do |node|
+      ChefSpec::Runner.new(platform: 'centos', version: 6.5) do |node|
         node.override['gitlab']['database']['type'] = 'postgres'
         node.override['gitlab']['web_fqdn'] = 'gitlab.example.com'
       end.converge(described_recipe)
@@ -96,6 +96,69 @@ describe 'gitlab::default' do
 
     it 'ISSUE #69 does not render gitlab shell config with boolean' do
       expect(chef_run).to_not render_file('/srv/git/gitlab-shell/config.yml').with_content(%r{gitlab_url:.*http://(true|false)})
+    end
+  end
+
+  context 'on centos 6.5 with /srv/git home, and default install_ruby_path' do
+    let(:chef_run) do
+      ChefSpec::Runner.new(platform: 'centos', version: 6.5) do |node|
+        node.override['gitlab']['home'] = '/srv/git'
+      end.converge(described_recipe)
+    end
+
+    it 'ISSUE #66 creates user git with home /srv/git' do
+      expect(chef_run).to create_user('git').with(home: '/srv/git')
+    end
+
+    it 'ISSUE #66 installs gems using /srv/git/bin/gem' do
+      %w[charlock_holmes bundler].each do |gem|
+        expect(chef_run).to install_gem_package(gem).with(gem_binary: '/srv/git/bin/gem')
+      end
+    end
+
+    it 'ISSUE #66 runs update-alternatives on /srv/git/bin/ruby' do
+      expect(chef_run).to run_execute('update-alternatives --install /usr/local/bin/ruby ruby /srv/git/bin/ruby 10')
+    end
+  end
+
+  context 'on centos 6.5 with /srv/git home, and /var/lib/git install_ruby_path' do
+    let(:chef_run) do
+      ChefSpec::Runner.new(platform: 'centos', version: '6.5') do |node|
+        node.override['gitlab']['home'] = '/srv/git'
+        node.override['gitlab']['install_ruby_path'] = '/var/lib/git'
+      end.converge(described_recipe)
+    end
+
+    it 'ISSUE #66 creates user git with home /srv/git' do
+      expect(chef_run).to create_user('git').with(home: '/srv/git')
+    end
+
+    it 'ISSUE #66 installs gems using /var/lib/git/bin/gem' do
+      %w[charlock_holmes bundler].each do |gem|
+        expect(chef_run).to install_gem_package(gem).with(gem_binary: '/var/lib/git/bin/gem')
+      end
+    end
+
+    it 'ISSUE #66 runs update-alternatives on /var/lib/git/bin/ruby' do
+      expect(chef_run).to run_execute('update-alternatives --install /usr/local/bin/ruby ruby /var/lib/git/bin/ruby 10')
+    end
+  end
+
+  context 'on centos 6.5 with Ruby package' do
+    let(:chef_run) do
+      ChefSpec::Runner.new(platform: 'centos', version: '6.5') do |node|
+        node.override['gitlab']['install_ruby'] = 'package'
+      end.converge(described_recipe)
+    end
+
+    it 'ISSUE #66 installs gems using system gem' do
+      %w[charlock_holmes bundler].each do |gem|
+        expect(chef_run).to install_gem_package(gem).with(gem_binary: nil)
+      end
+    end
+
+    it 'ISSUE #66 does not run update-alternatives-ruby' do
+      expect(chef_run).to_not run_execute('update-alternatives-ruby')
     end
   end
 end

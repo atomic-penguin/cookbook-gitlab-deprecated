@@ -4,6 +4,7 @@ Gitlab Cookbook Changelog
 v6.4.5 - v6.4.6
 ---------------
 
+* Add regression tests for #66 hackery
 * Issue #66, #71 regression, update-alternatives hack does not work when install_ruby_path
   is changed.
 

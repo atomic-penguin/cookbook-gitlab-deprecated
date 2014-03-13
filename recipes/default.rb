@@ -121,7 +121,6 @@ else
 # Install required Ruby Gems for Gitlab with system gem
   %w[charlock_holmes bundler].each do |gempkg|
     gem_package gempkg do
-      gem_binary "#{node['gitlab']['install_ruby_path']}/bin/gem"
       action :install
       options('--no-ri --no-rdoc')
     end
