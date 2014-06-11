@@ -106,11 +106,11 @@ if node['gitlab']['install_ruby'] !~ /package/
   # cross-platform. Issue #66
   execute 'update-alternatives-ruby' do
     command "update-alternatives --install /usr/local/bin/ruby ruby #{node['gitlab']['install_ruby_path']}/bin/ruby 10"
-    not_if { ::File.exists?('/usr/local/bin/ruby') }
+    not_if { ::File.exist?('/usr/local/bin/ruby') }
   end
 
   # Install required Ruby Gems for Gitlab with ~git/bin/gem
-  %w[charlock_holmes bundler].each do |gempkg|
+  %w(charlock_holmes bundler).each do |gempkg|
     gem_package gempkg do
       gem_binary "#{node['gitlab']['install_ruby_path']}/bin/gem"
       action :install
@@ -119,7 +119,7 @@ if node['gitlab']['install_ruby'] !~ /package/
   end
 else
 # Install required Ruby Gems for Gitlab with system gem
-  %w[charlock_holmes bundler].each do |gempkg|
+  %w(charlock_holmes bundler).each do |gempkg|
     gem_package gempkg do
       action :install
       options('--no-ri --no-rdoc')
@@ -218,7 +218,7 @@ cookbook_file "#{node['gitlab']['app_home']}/config/initializers/rack_attack.rb"
 end
 
 # create log, tmp, pids and sockets directory
-%w{ log tmp tmp/pids tmp/sockets public/uploads }.each do |dir|
+%w(log tmp tmp/pids tmp/sockets public/uploads).each do |dir|
   directory File.join(node['gitlab']['app_home'], dir) do
     user node['gitlab']['user']
     group node['gitlab']['group']
@@ -234,7 +234,7 @@ logrotate_app 'gitlab' do
   path ["#{node['gitlab']['app_home']}/log/*.log",
         "#{node['gitlab']['shell']['home']}/gitlab-shell.log"]
   rotate 52
-  options %w[compress delaycompress notifempty copytruncate]
+  options %w(compress delaycompress notifempty copytruncate)
 end
 
 # create gitlab-satellites directory
@@ -286,7 +286,7 @@ execute 'gitlab-bundle-install' do
   user node['gitlab']['user']
   group node['gitlab']['group']
   environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  not_if { File.exists?(bundle_success) }
+  not_if { File.exist?(bundle_success) }
 end
 
 # Precompile assets
@@ -305,7 +305,7 @@ execute 'gitlab-bundle-rake' do
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
-  not_if { File.exists?("#{node['gitlab']['app_home']}/.gitlab-setup") }
+  not_if { File.exist?("#{node['gitlab']['app_home']}/.gitlab-setup") }
 end
 
 # Use certificate cookbook for keys.

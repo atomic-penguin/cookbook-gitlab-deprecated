@@ -57,37 +57,37 @@ include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
 default['gitlab']['install_ruby'] = '1.9.3-p484'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
-default['gitlab']['cookbook_dependencies'] = %w[
+default['gitlab']['cookbook_dependencies'] = %w(
   zlib readline ncurses openssh
   logrotate redisio::install redisio::enable ruby_build
-]
+)
 
 # Required packages for Gitlab
 case node['platform_family']
 when 'debian'
-  default['gitlab']['packages'] = %w[
+  default['gitlab']['packages'] = %w(
     libyaml-dev libssl-dev libgdbm-dev libffi-dev checkinstall
     curl libcurl4-openssl-dev libicu-dev wget python-docutils sudo
-  ]
+)
 when 'rhel'
-  default['gitlab']['packages'] = %w[
+  default['gitlab']['packages'] = %w(
     libyaml-devel openssl-devel gdbm-devel libffi-devel
     curl libcurl-devel libicu-devel wget python-docutils sudo
-  ]
+)
 else
   default['gitlab']['install_ruby'] = 'package'
-  default['gitlab']['cookbook_dependencies'] = %w[
+  default['gitlab']['cookbook_dependencies'] = %w(
     openssh readline zlib ruby_build
     redisio::install redisio::enable
-  ]
-  default['gitlab']['packages'] = %w[
+)
+  default['gitlab']['packages'] = %w(
     autoconf binon flex gcc gcc-c++ make m4
     git
     zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
     libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
     redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev
     libicu-dev python-docutils sudo
-  ]
+)
 end
 
 default['gitlab']['trust_local_sshkeys'] = 'yes'

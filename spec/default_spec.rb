@@ -111,7 +111,7 @@ describe 'gitlab::default' do
     end
 
     it 'ISSUE #66 installs gems using /srv/git/bin/gem' do
-      %w[charlock_holmes bundler].each do |gem|
+      %w(charlock_holmes bundler).each do |gem|
         expect(chef_run).to install_gem_package(gem).with(gem_binary: '/srv/git/bin/gem')
       end
     end
@@ -134,7 +134,7 @@ describe 'gitlab::default' do
     end
 
     it 'ISSUE #66 installs gems using /var/lib/git/bin/gem' do
-      %w[charlock_holmes bundler].each do |gem|
+      %w(charlock_holmes bundler).each do |gem|
         expect(chef_run).to install_gem_package(gem).with(gem_binary: '/var/lib/git/bin/gem')
       end
     end
@@ -152,7 +152,7 @@ describe 'gitlab::default' do
     end
 
     it 'ISSUE #66 installs gems using system gem' do
-      %w[charlock_holmes bundler].each do |gem|
+      %w(charlock_holmes bundler).each do |gem|
         expect(chef_run).to install_gem_package(gem).with(gem_binary: nil)
       end
     end

@@ -42,23 +42,23 @@ database_connection = {
 
 # Create the database
 mysql_database database do
-  connection      database_connection
-  action          :create
+  connection database_connection
+  action :create
 end
 
 # Create the database user
 mysql_database_user database_user do
-  connection      database_connection
-  password        database_password
-  host            database_userhost
-  database_name   database
-  action          :create
+  connection database_connection
+  password database_password
+  host database_userhost
+  database_name database
+  action :create
 end
 
 # Grant all privileges to user on database
 mysql_database_user database_user do
-  connection      database_connection
-  database_name   database
+  connection database_connection
+  database_name database
   privileges ['SELECT', 'LOCK TABLES', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'INDEX', 'ALTER']
-  action          :grant
+  action :grant
 end
