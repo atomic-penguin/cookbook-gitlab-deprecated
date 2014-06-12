@@ -4,6 +4,7 @@ describe 'gitlab::default' do
 
   before do
     stub_command('git --version >/dev/null').and_return(true)
+    stub_command('which nginx').and_return(true)
   end
 
   context 'on Centos 6.5 with mysql and https' do
@@ -33,7 +34,7 @@ describe 'gitlab::default' do
     end
 
     it 'runs execute without postgres' do
-      expect(chef_run).to run_execute(/bundle install --deployment --without.*postgres.*/)
+      expect(chef_run).to run_execute(/bundle install --deployment.+--without.+postgres.+/)
     end
 
     it 'ISSUE #67 does not include cookbook sudo' do
@@ -79,7 +80,7 @@ describe 'gitlab::default' do
     end
 
     it 'runs execute without postgres' do
-      expect(chef_run).to run_execute(/bundle install --deployment --without.*mysql.*/)
+      expect(chef_run).to run_execute(/bundle install --deployment.+--without.+mysql.+/)
     end
 
     it 'ISSUE #67 does not include cookbook sudo' do

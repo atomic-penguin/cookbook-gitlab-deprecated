@@ -1,6 +1,17 @@
 Gitlab Cookbook Changelog
 =========================
 
+v6.9.0
+------
+
+* Fix Rubocop warnings
+* Issue #76
+  * Bump version to 6.9
+  * depsolv problem with modernizr
+*  Issue #74
+  * Use database::mysql and database::postgresql for database cookbook
+    library functionality as mysql::ruby postgres::ruby deprecrated.
+
 v6.4.5 - v6.4.6
 ---------------
 

@@ -5,9 +5,9 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:chefspec)
 
 # rubocop rake task
-desc 'Ruby style guide linter'
+desc 'Ruby style guide linter, fails on Error or Warn'
 task :rubocop do
-  sh 'rubocop'
+  sh 'rubocop --fail-level W'
 end
 
 # foodcritic task

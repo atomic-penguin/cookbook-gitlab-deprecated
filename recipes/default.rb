@@ -118,7 +118,7 @@ if node['gitlab']['install_ruby'] !~ /package/
     end
   end
 else
-# Install required Ruby Gems for Gitlab with system gem
+  # Install required Ruby Gems for Gitlab with system gem
   %w(charlock_holmes bundler).each do |gempkg|
     gem_package gempkg do
       action :install
@@ -281,7 +281,7 @@ bundle_success = "#{node['gitlab']['app_home']}/vendor/bundle/.success"
 
 # Install Gems with bundle install
 execute 'gitlab-bundle-install' do
-  command "#{bundler_binary} install --deployment --without development test #{without_group} aws && touch #{bundle_success}"
+  command "#{bundler_binary} install --deployment --binstubs --without development test #{without_group} aws && touch #{bundle_success}"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
