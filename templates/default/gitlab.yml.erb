@@ -31,6 +31,11 @@ production: &base
     # Uncomment and customize if you can't use the default user to run GitLab (default: 'git')
     user: <%= node['gitlab']['user'] %>
 
+    ## Date & Time settings
+    # Uncomment and customize if you want to change the default time zone of GitLab application.
+    # To see all available zones, run `bundle exec rake time:zones:all RAILS_ENV=production`
+    # time_zone: 'UTC'
+
     ## Email settings
     # Email address used in the "From" field in mails sent by GitLab
     email_from: <%= node['gitlab']['email_from'] %>
@@ -44,11 +49,25 @@ production: &base
     username_changing_enabled: <%= node['gitlab']['username_changing_enabled'] %> # default: true - User can change her username/namespace
 
     ## Users management
+    ## Users can create accounts
+    # This also allows normal users to sign up for accounts themselves
+    # default: false - By default GitLab administrators must create all new accounts
     # signup_enabled: true          # default: false - Account passwords are not sent via the email if signup is enabled.
+
+    ## Standard login settings
+    # The standard login can be disabled to force login via LDAP
+    # default: true - If set to false the standard login form won't be shown on the sign-in page
+    # signin_enabled: false
+
+    # Restrict setting visibility levels for non-admin users.
+    # The default is to allow all levels.
+    # restricted_visibility_levels: [ "public" ]
+
 
     ## Automatic issue closing
     # If a commit message matches this regular express, all issues referenced from the matched text will be closed
     # if it's pushed to a project's default branch.
+    # Tip: you can test your closing pattern at http://rubular.com
     # issue_closing_pattern: "^([Cc]loses|[Ff]ixes) +#\d+"
 
     ## Default project features settings
@@ -56,8 +75,11 @@ production: &base
       issues: true
       merge_requests: true
       wiki: true
-      wall: false
       snippets: false
+
+    ## Webhook settings
+    # Number of seconds to wait for HTTP response after sending webhook HTTP POST request (default: 10)
+    # webhook_timeout: 10
 
   ## External issues trackers
   issues_tracker:
@@ -99,14 +121,63 @@ production: &base
   ## LDAP settings
   ldap:
     enabled: <%= node['gitlab']['ldap']['enabled'] %>
-    host: <%= node['gitlab']['ldap']['host'] %>
-    base: <%= node['gitlab']['ldap']['base'] %>
-    port: <%= node['gitlab']['ldap']['port'] %>
-    uid: <%= node['gitlab']['ldap']['uid'] %>
-    method: <%= node['gitlab']['ldap']['method'] %> # "ssl" or "plain"
-    bind_dn: <%= node['gitlab']['ldap']['bind_dn'] %>
-    password: <%= node['gitlab']['ldap']['password'] %>
-    allow_username_or_email_login: <%= node['gitlab']['ldap']['allow_username_or_email_login'] %>
+    servers:
+      main: # 'main' is the GitLab 'provider ID' of this LDAP server
+        ## label
+        #
+        # A human-friendly name for your LDAP server. It is OK to change the label later,
+        # for instance if you find out it is too large to fit on the web page.
+        #
+        # Example: 'Paris' or 'Acme, Ltd.'
+        label: 'LDAP'
+
+        host: <%= node['gitlab']['ldap']['host'] %>
+        port: <%= node['gitlab']['ldap']['port'] %>
+        uid: <%= node['gitlab']['ldap']['uid'] %>
+        method: <%= node['gitlab']['ldap']['method'] %> # "ssl" or "plain"
+        bind_dn: <%= node['gitlab']['ldap']['bind_dn'] %>
+        password: <%= node['gitlab']['ldap']['password'] %>
+
+        # This setting specifies if LDAP server is Active Directory LDAP server.
+        # For non AD servers it skips the AD specific queries.
+        # If your LDAP server is not AD, set this to false.
+        active_directory: true
+
+        # If allow_username_or_email_login is enabled, GitLab will ignore everything
+        # after the first '@' in the LDAP username submitted by the user on login.
+        #
+        # Example:
+        # - the user enters 'jane.doe@example.com' and 'p@ssw0rd' as LDAP credentials;
+        # - GitLab queries the LDAP server with 'jane.doe' and 'p@ssw0rd'.
+        #
+        # If you are using "uid: 'userPrincipalName'" on ActiveDirectory you need to
+        # disable this setting, because the userPrincipalName contains an '@'.
+        allow_username_or_email_login: <%= node['gitlab']['ldap']['allow_username_or_email_login'] %>
+
+        # Base where we can search for users
+        #
+        #   Ex. ou=People,dc=gitlab,dc=example
+        #
+        base: '<%= node['gitlab']['ldap']['base'] %>'
+
+        # Filter LDAP users
+        #
+        #   Format: RFC 4515 http://tools.ietf.org/search/rfc4515
+        #   Ex. (employeeType=developer)
+        #
+        #   Note: GitLab does not support omniauth-ldap's custom filter syntax.
+        #
+        user_filter: '<%= node['gitlab']['ldap']['user_filter'] %>'
+
+      # GitLab EE only: add more LDAP servers
+      # Choose an ID made of a-z and 0-9 . This ID will be stored in the database
+      # so that GitLab can remember which LDAP server a user belongs to.
+      # uswest2:
+      #   label:
+      #   host:
+      #   ....
+
+
 
   ## OmniAuth settings
   omniauth:
@@ -145,11 +216,21 @@ production: &base
   satellites:
     # Relative paths are relative to Rails.root (default: tmp/repo_satellites/)
     path: <%= @git_home %>/gitlab-satellites/
+    timeout: 30
 
   ## Backup settings
   backup:
     path: "<%= @backup_path %>"   # Relative paths are relative to Rails.root (default: tmp/backups/)
     keep_time: <%= @backup_keep_time %>   # default: 0 (forever) (in seconds)
+    # upload:
+    #   # Fog storage connection settings, see http://fog.io/storage/ .
+    #   connection:
+    #     provider: AWS
+    #     region: eu-west-1
+    #     aws_access_key_id: AKIAKIAKI
+    #     aws_secret_access_key: 'secret123'
+    #   # The remote 'directory' to store your backups. For S3, this would be the bucket name.
+    #   remote_directory: 'my.s3.bucket'
 
   ## GitLab Shell settings
   gitlab_shell:
@@ -171,7 +252,7 @@ production: &base
     bin_path: /usr/bin/git
     # Max size of a git object (e.g. a commit), in bytes
     # This value can be increased if you have very large commits
-    max_size: 5242880 # 5.megabytes
+    max_size: 20971520 # 20.megabytes
     # Git timeout to read a commit, in seconds
     timeout: 10
 
@@ -188,16 +269,58 @@ production: &base
     #   ![Company Logo](http://www.companydomain.com/logo.png)
     #   [Learn more about CompanyName](http://www.companydomain.com/)
 
+  rack_attack:
+    git_basic_auth:
+      # Whitelist requests from 127.0.0.1 for web proxies (NGINX/Apache) with incorrect headers
+      # ip_whitelist: ["127.0.0.1"]
+      #
+      # Limit the number of Git HTTP authentication attempts per IP
+      # maxretry: 10
+      #
+      # Reset the auth attempt counter per IP after 60 seconds
+      # findtime: 60
+      #
+      # Ban an IP for one hour (3600s) after too many auth attempts
+      # bantime: 3600
+
+
 development:
   <<: *base
 
 test:
   <<: *base
+    host: localhost
+    port: 80
+
+    # When you run tests we clone and setup gitlab-shell
+    # In order to setup it correctly you need to specify
+    # your system username you use to run GitLab
+    # user: YOUR_USERNAME
+  satellites:
+    path: tmp/tests/gitlab-satellites/
+  gitlab_shell:
+    path: tmp/tests/gitlab-shell/
+    repos_path: tmp/tests/repositories/
+    hooks_path: tmp/tests/gitlab-shell/hooks/
   issues_tracker:
     redmine:
       project_url: "http://redmine/projects/:issues_tracker_id"
       issues_url: "http://redmine/:project_id/:issues_tracker_id/:id"
       new_issue_url: "http://redmine/projects/:issues_tracker_id/issues/new"
+  ldap:
+    enabled: false
+    servers:
+      main:
+        label: ldap
+        host: 127.0.0.1
+        port: 3890
+        uid: 'uid'
+        method: 'plain' # "tls" or "ssl" or "plain"
+        base: 'dc=example,dc=com'
+        user_filter: ''
+        group_base: 'ou=groups,dc=example,dc=com'
+        admin_group: ''
+        sync_ssh_keys: false
 
 staging:
   <<: *base
