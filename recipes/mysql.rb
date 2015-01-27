@@ -28,6 +28,13 @@ ruby_block 'save node data' do
   not_if { Chef::Config[:solo] }
 end
 
+#mysql_service 'default' do
+  #port '3306'
+  #initial_root_password 'change_me_FIXME'
+  #action [:create, :start]
+#end
+
+
 # Helper variables
 database = node['gitlab']['database']['database']
 database_user = node['gitlab']['database']['username']
@@ -37,7 +44,8 @@ database_host = node['gitlab']['database']['host']
 database_connection = {
   host: database_host,
   username: 'root',
-  password: node['mysql']['server_root_password']
+  #password: node['mysql']['server_root_password']
+  password: node['gitlab']['database']['password']
 }
 
 # Create the database
