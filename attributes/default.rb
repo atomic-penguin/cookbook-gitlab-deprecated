@@ -121,3 +121,6 @@ default['gitlab']['ldap']['user_filter'] = ''
 
 # Gravatar
 default['gitlab']['gravatar']['enabled'] = true
+
+# Mysql
+default['mysql']['server_root_password'] = 'Ch4ngm3'
