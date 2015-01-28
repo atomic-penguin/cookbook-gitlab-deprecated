@@ -11,6 +11,7 @@ describe 'gitlab::default' do
     let(:chef_run) do
       ChefSpec::Runner.new(platform: 'centos', version: 6.5) do |node|
         node.override['gitlab']['database']['type'] = 'mysql'
+        node.override['mysql']['server_root_password'] = 'test'
         node.override['gitlab']['https'] = true
         node.override['gitlab']['web_fqdn'] = 'gitlab.example.com'
       end.converge(described_recipe)
@@ -103,6 +104,7 @@ describe 'gitlab::default' do
   context 'on centos 6.5 with /srv/git home, and default install_ruby_path' do
     let(:chef_run) do
       ChefSpec::Runner.new(platform: 'centos', version: 6.5) do |node|
+        node.override['mysql']['server_root_password'] = 'test'
         node.override['gitlab']['home'] = '/srv/git'
       end.converge(described_recipe)
     end
@@ -125,6 +127,7 @@ describe 'gitlab::default' do
   context 'on centos 6.5 with /srv/git home, and /var/lib/git install_ruby_path' do
     let(:chef_run) do
       ChefSpec::Runner.new(platform: 'centos', version: '6.5') do |node|
+        node.override['mysql']['server_root_password'] = 'test'
         node.override['gitlab']['home'] = '/srv/git'
         node.override['gitlab']['install_ruby_path'] = '/var/lib/git'
       end.converge(described_recipe)
@@ -148,6 +151,7 @@ describe 'gitlab::default' do
   context 'on centos 6.5 with Ruby package' do
     let(:chef_run) do
       ChefSpec::Runner.new(platform: 'centos', version: '6.5') do |node|
+        node.override['mysql']['server_root_password'] = 'test'
         node.override['gitlab']['install_ruby'] = 'package'
       end.converge(described_recipe)
     end
