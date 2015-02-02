@@ -163,7 +163,7 @@ is calculated.
 
 * gitlab['database']['adapter']
   - The Rails adapter to use with the database type
-  - Options: "mysql2", "postgresql"
+  - Options: "mysql", "postgresql"
   - Default (varies based on `type`)
 
 * gitlab['database']['encoding']

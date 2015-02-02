@@ -59,7 +59,7 @@ default['gitlab']['install_ruby'] = '1.9.3-p484'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib readline ncurses openssh
-  logrotate redisio::install redisio::enable ruby_build
+  logrotate redisio::default redisio::enable ruby_build
 )
 
 # Required packages for Gitlab
