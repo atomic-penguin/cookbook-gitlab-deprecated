@@ -35,17 +35,18 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'git://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '6-9-stable'
+default['gitlab']['git_branch'] = '7-7-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'git://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v1.9.4'
+default['gitlab']['shell']['git_branch'] = 'v2.4.1'
 
 # Database setup
 default['gitlab']['database']['type'] = 'mysql'
 default['gitlab']['database']['adapter'] = node['gitlab']['database']['type'] == 'mysql' ? 'mysql2' : 'postgresql'
 default['gitlab']['database']['encoding'] = node['gitlab']['database']['type'] == 'mysql' ? 'utf8' : 'unicode'
+default['gitlab']['database']['collation'] = 'utf8_general_ci'
 default['gitlab']['database']['host'] = 'localhost'
 default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = 'gitlab'
@@ -55,7 +56,7 @@ default['gitlab']['database']['userhost'] = 'localhost'
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '1.9.3-p484'
+default['gitlab']['install_ruby'] = '2.1.2'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib readline ncurses openssh
@@ -81,7 +82,7 @@ else
     redisio::install redisio::enable
   )
   default['gitlab']['packages'] = %w(
-    autoconf binon flex gcc gcc-c++ make m4
+    autoconf binon flex gcc gcc-c++ make m4 cmake
     git
     zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
     libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
@@ -115,6 +116,11 @@ default['gitlab']['ldap']['method'] = 'ssl'
 default['gitlab']['ldap']['bind_dn'] = '_the_full_dn_of_the_user_you_will_bind_with'
 default['gitlab']['ldap']['password'] = '_the_password_of_the_bind_user'
 default['gitlab']['ldap']['allow_username_or_email_login'] = true
+default['gitlab']['ldap']['base'] = ''
+default['gitlab']['ldap']['user_filter'] = ''
 
 # Gravatar
 default['gitlab']['gravatar']['enabled'] = true
+
+# Mysql
+default['mysql']['server_root_password'] = 'Ch4ngm3'
