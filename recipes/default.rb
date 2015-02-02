@@ -187,6 +187,7 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
   variables(
       adapter: node['gitlab']['database']['adapter'],
       encoding: node['gitlab']['database']['encoding'],
+      collation: node['gitlab']['database']['collation'],
       host: node['gitlab']['database']['host'],
       database: node['gitlab']['database']['database'],
       pool: node['gitlab']['database']['pool'],
