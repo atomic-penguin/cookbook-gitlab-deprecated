@@ -69,11 +69,13 @@ when 'debian'
   default['gitlab']['packages'] = %w(
     libyaml-dev libssl-dev libgdbm-dev libffi-dev checkinstall
     curl libcurl4-openssl-dev libicu-dev wget python-docutils sudo
+    cmake libkrb5-dev pkg-config
   )
 when 'rhel'
   default['gitlab']['packages'] = %w(
     libyaml-devel openssl-devel gdbm-devel libffi-devel
     curl libcurl-devel libicu-devel wget python-docutils sudo
+    cmake libkrb5-dev pkgconfig
   )
 else
   default['gitlab']['install_ruby'] = 'package'
@@ -87,7 +89,7 @@ else
     zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
     libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
     redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev
-    libicu-dev python-docutils sudo
+    libicu-dev python-docutils sudo libkrb5-dev pkg-config
   )
 end
 
