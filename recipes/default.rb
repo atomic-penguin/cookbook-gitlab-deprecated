@@ -88,8 +88,8 @@ template "#{node['gitlab']['home']}/.ssh/config" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-      fqdn: node['fqdn'],
-      trust_local_sshkeys: node['gitlab']['trust_local_sshkeys']
+    fqdn: node['fqdn'],
+    trust_local_sshkeys: node['gitlab']['trust_local_sshkeys']
   )
 end
 
@@ -150,8 +150,8 @@ template node['gitlab']['shell']['home'] + '/config.yml' do
   mode '0644'
   source 'shell_config.yml.erb'
   variables(
-      fqdn: api_fqdn,
-      listen: listen_port
+    fqdn: api_fqdn,
+    listen: listen_port
   )
 end
 
@@ -173,8 +173,8 @@ template '/etc/init.d/gitlab' do
   mode '0755'
   source 'gitlab.init.erb'
   variables(
-      gitlab_app_home: node['gitlab']['app_home'],
-      gitlab_user: node['gitlab']['user']
+    gitlab_app_home: node['gitlab']['app_home'],
+    gitlab_user: node['gitlab']['user']
   )
 end
 
@@ -185,14 +185,14 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-      adapter: node['gitlab']['database']['adapter'],
-      encoding: node['gitlab']['database']['encoding'],
-      collation: node['gitlab']['database']['collation'],
-      host: node['gitlab']['database']['host'],
-      database: node['gitlab']['database']['database'],
-      pool: node['gitlab']['database']['pool'],
-      username: node['gitlab']['database']['username'],
-      password: node['gitlab']['database']['password']
+    adapter: node['gitlab']['database']['adapter'],
+    encoding: node['gitlab']['database']['encoding'],
+    collation: node['gitlab']['database']['collation'],
+    host: node['gitlab']['database']['host'],
+    database: node['gitlab']['database']['database'],
+    pool: node['gitlab']['database']['pool'],
+    username: node['gitlab']['database']['username'],
+    password: node['gitlab']['database']['password']
   )
 end
 
@@ -202,12 +202,12 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-      fqdn: node['gitlab']['web_fqdn'] || node['fqdn'],
-      https_boolean: node['gitlab']['https'],
-      git_user: node['gitlab']['user'],
-      git_home: node['gitlab']['home'],
-      backup_path: node['gitlab']['backup_path'],
-      backup_keep_time: node['gitlab']['backup_keep_time']
+    fqdn: node['gitlab']['web_fqdn'] || node['fqdn'],
+    https_boolean: node['gitlab']['https'],
+    git_user: node['gitlab']['user'],
+    git_home: node['gitlab']['home'],
+    backup_path: node['gitlab']['backup_path'],
+    backup_keep_time: node['gitlab']['backup_keep_time']
   )
 end
 
@@ -270,8 +270,8 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   group node['gitlab']['group']
   mode '0644'
   variables(
-      fqdn: node['fqdn'],
-      gitlab_app_home: node['gitlab']['app_home']
+    fqdn: node['fqdn'],
+    gitlab_app_home: node['gitlab']['app_home']
   )
 end
 
@@ -332,13 +332,13 @@ template '/etc/nginx/sites-available/gitlab' do
   source 'nginx.gitlab.erb'
   notifies :restart, 'service[nginx]'
   variables(
-      server_name: node['gitlab']['nginx_server_names'].join(' '),
-      hostname: node['hostname'],
-      gitlab_app_home: node['gitlab']['app_home'],
-      https_boolean: node['gitlab']['https'],
-      ssl_certificate: node['gitlab']['ssl_certificate'],
-      ssl_certificate_key: node['gitlab']['ssl_certificate_key'],
-      listen: "#{node['gitlab']['listen_ip']}:#{listen_port}"
+    server_name: node['gitlab']['nginx_server_names'].join(' '),
+    hostname: node['hostname'],
+    gitlab_app_home: node['gitlab']['app_home'],
+    https_boolean: node['gitlab']['https'],
+    ssl_certificate: node['gitlab']['ssl_certificate'],
+    ssl_certificate_key: node['gitlab']['ssl_certificate_key'],
+    listen: "#{node['gitlab']['listen_ip']}:#{listen_port}"
   )
 end
 
