@@ -16,7 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include_recipe 'database::mysql'
+mysql2_chef_gem 'default' do
+  client_version node['mysql']['version'] if node['mysql']
+  action :install
+end
 
 # Enable secure password generation
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)

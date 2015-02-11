@@ -12,6 +12,7 @@ version '7.7.0'
   depends cb_depend
 end
 depends 'mysql', '~> 6.0'
+depends 'mysql2_chef_gem'
 
 %w(redhat centos scientific amazon debian ubuntu).each do |os|
   supports os
