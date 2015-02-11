@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 mysql2_chef_gem 'default' do
-  client_version node['mysql']['version'] if node['mysql']
+  client_version node['mysql']['version'] if node['mysql']['version']
   action :install
 end
 
@@ -32,10 +32,9 @@ ruby_block 'save node data' do
 end
 
 # install mysql database
-# include_recipe "mysql"
 mysql_service 'default' do
   port '3306'
-  # version '5.5'
+  version node['mysql']['version'] if node['mysql']['version']
   initial_root_password node['mysql']['server_root_password']
   action [:create, :start]
 end
