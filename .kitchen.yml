@@ -1,5 +1,5 @@
 ---
-driver_plugin: vagrant 
+driver_plugin: vagrant
 driver_config:
   customize:
     memory: 1024
@@ -27,7 +27,7 @@ platforms:
 
 suites:
 - name: default
-  run_list: ["recipe[database::mysql]", "recipe[gitlab]"]
+  run_list: ["recipe[gitlab]"]
   attributes:
     mysql:
       server_debian_password: test
@@ -42,7 +42,7 @@ suites:
 - name: https
   data_bags_path: "test/integration/https/data_bags"
   encrypted_data_bag_secret_key_path: "test/integration/https/encrypted_data_bag_secret"
-  run_list: ["recipe[mysql::server]", "recipe[gitlab]"]
+  run_list: ["recipe[gitlab]"]
   attributes:
     mysql:
       server_debian_password: test

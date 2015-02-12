@@ -126,3 +126,4 @@ default['gitlab']['gravatar']['enabled'] = true
 
 # Mysql
 default['mysql']['server_root_password'] = 'Ch4ngm3'
+default['build-essential']['compile_time'] = true # needed for mysql chef_gem
