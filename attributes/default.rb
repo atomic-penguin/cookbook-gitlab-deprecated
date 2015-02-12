@@ -81,7 +81,7 @@ else
   default['gitlab']['install_ruby'] = 'package'
   default['gitlab']['cookbook_dependencies'] = %w(
     openssh readline zlib ruby_build
-    redisio::install redisio::enable
+    redisio::default redisio::enable
   )
   default['gitlab']['packages'] = %w(
     autoconf binon flex gcc gcc-c++ make m4 cmake
