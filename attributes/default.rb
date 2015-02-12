@@ -75,7 +75,7 @@ when 'rhel'
   default['gitlab']['packages'] = %w(
     libyaml-devel openssl-devel gdbm-devel libffi-devel
     curl libcurl-devel libicu-devel wget python-docutils sudo
-    cmake libkrb5-dev pkgconfig
+    cmake krb5-devel pkgconfig
   )
 else
   default['gitlab']['install_ruby'] = 'package'
