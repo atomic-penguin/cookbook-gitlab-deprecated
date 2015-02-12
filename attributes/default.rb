@@ -47,11 +47,11 @@ default['gitlab']['database']['type'] = 'mysql'
 default['gitlab']['database']['adapter'] = node['gitlab']['database']['type'] == 'mysql' ? 'mysql2' : 'postgresql'
 default['gitlab']['database']['encoding'] = node['gitlab']['database']['type'] == 'mysql' ? 'utf8' : 'unicode'
 default['gitlab']['database']['collation'] = 'utf8_general_ci'
-default['gitlab']['database']['host'] = 'localhost'
+default['gitlab']['database']['host'] = '127.0.0.1'
 default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
-default['gitlab']['database']['userhost'] = 'localhost'
+default['gitlab']['database']['userhost'] = '127.0.0.1'
 
 # Ruby setup
 include_attribute 'ruby_build'
