@@ -90,7 +90,7 @@ Attributes
 
 * `gitlab['install_ruby']`
   - Attribute to determine whether vendor packages are installed,
-    or Rubies are built, defaults 1.9.3 for Debian and RHEL family platforms.
+    or Rubies are built, defaults 2.1.2 for Debian and RHEL family platforms.
   - If you choose to use a vendor provided package, you will need to use
     a role to override the `gitlab['packages']` array.
 
@@ -172,11 +172,11 @@ is calculated.
 
 * gitlab['database']['host']
   - The host (fqdn) where the database exists
-  - Default `localhost`
+  - Default `127.0.0.1`
 
 * gitlab['database']['userhost']
   - The host (fqdn) from which the database user may connect.
-  - Default `localhost`
+  - Default `127.0.0.1`
 
 * gitlab['database']['pool']
   - The maximum number of connections to allow
@@ -230,6 +230,10 @@ is calculated.
 * `gitlab['ldap']['allow_username_or_email_login']`
   - If you want to allow users to login using both username and email address even though username (uid) will actually be used
   - Default: true
+
+* `gitlab['ldap']['user_filter']`
+  - You can provide a query string here to filter which users will be selected
+  - Default: ""
 
 Usage
 =====
