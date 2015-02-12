@@ -9,7 +9,7 @@
 }
 
 @test 'mysql schema is initialized and has projects* tables' {
-  echo 'show tables;' | mysql -u root --password='test' gitlab | grep 'projects'
+  echo 'show tables;' | mysql -h 127.0.0.1 -u root --password='test' gitlab | grep 'projects'
 }
 
 @test 'nginx is running' {

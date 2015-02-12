@@ -29,11 +29,10 @@ suites:
 - name: default
   run_list: ["recipe[gitlab]"]
   attributes:
-    mysql:
-      server_debian_password: test
-      server_backup_password: test
-      server_root_password: test
-      server_repl_password: test
+    gitlab:
+      database:
+        host: 127.0.0.1
+        password: test
     authorization:
       sudo:
         groups:
@@ -44,13 +43,9 @@ suites:
   encrypted_data_bag_secret_key_path: "test/integration/https/encrypted_data_bag_secret"
   run_list: ["recipe[gitlab]"]
   attributes:
-    mysql:
-      server_debian_password: test
-      server_backup_password: test
-      server_root_password: test
-      server_repl_password: test
     gitlab:
       https: true
       certificate_databag_id: test
       database:
+        host: 127.0.0.1
         password: test
