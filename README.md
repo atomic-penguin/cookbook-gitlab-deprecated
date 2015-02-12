@@ -17,7 +17,7 @@ Gitlab master.
 For the initial 6.1.x release of the cookbook, the default Ruby will
 be 1.9.3 compiled with [ruby_build](http://fnichol.github.com/chef-ruby_build/).
 Using a compiled 1.9.3 Ruby follows the Gitlab installation guidelines upstream.
-If you have a better approach which reduced complexity or reduces converge time, 
+If you have a better approach which reduced complexity or reduces converge time,
 please open a pull request on Github.
 
 The application home has moved from `/var/gitlab/gitlab` to `/srv/git/gitlab`
@@ -128,27 +128,27 @@ Attributes
     See [nginx server_name documentation](http://nginx.org/en/docs/http/server_names.html)
     for valid matching patterns.
 
-* gitlab['gravatar']['enabled']
-  - Use Gravatar to fetch user avatars 
+* `gitlab['gravatar']['enabled']`
+  - Use Gravatar to fetch user avatars
   - Options: "true", "false"
   - Default "true"
 
-### User privileges 
+### User privileges
 
 **Note**, This attributes are useful when you want only admins to create projects and groups. And to restrict username changing.
 
-* default['gitlab']['default_projects_limit']
-  - When you create a user this value is their `projects_limit` profile setting. 
+* `gitlab['default_projects_limit']`
+  - When you create a user this value is their `projects_limit` profile setting.
   - If you put it at 0, regular users can't create repos.
   - Default, 10.
 
-* default['gitlab']['default_can_create_group']
+* `gitlab['default_can_create_group']`
   - When you create a user this value is their `can_create_group` profile setting.
-  - Default, true. 
+  - Default, true.
 
-* default['gitlab']['username_changing_enabled']
+* `gitlab['username_changing_enabled']`
   - Disable/enable users changing their username.
-  - Default, true. 
+  - Default, true.
 
 ### Database Attributes
 
@@ -156,37 +156,37 @@ Attributes
 you're using a non-standard installation. Please see `attributes/default.rb` for more information on how a dynamic attribute
 is calculated.
 
-* gitlab['database']['type']
+* `gitlab['database']['type']`
   - The database (datastore) to use.
   - Options: "mysql", "postgres"
   - Default "mysql"
 
-* gitlab['database']['adapter']
+* `gitlab['database']['adapter']`
   - The Rails adapter to use with the database type
   - Options: "mysql", "postgresql"
   - Default (varies based on `type`)
 
-* gitlab['database']['encoding']
+* `gitlab['database']['encoding']`
   - The database encoding
   - Default (varies based on `type`)
 
-* gitlab['database']['host']
+* `gitlab['database']['host']`
   - The host (fqdn) where the database exists
   - Default `127.0.0.1`
 
-* gitlab['database']['userhost']
+* `gitlab['database']['userhost']`
   - The host (fqdn) from which the database user may connect.
   - Default `127.0.0.1`
 
-* gitlab['database']['pool']
+* `gitlab['database']['pool']`
   - The maximum number of connections to allow
   - Default 5
 
-* gitlab['database']['database']
+* `gitlab['database']['database']`
   - The name of the database
   - Default `gitlab`
 
-* gitlab['database']['username']
+* `gitlab['database']['username']`
   - The username for the database
   - Default `gitlab`
 
