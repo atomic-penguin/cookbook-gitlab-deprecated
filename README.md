@@ -14,13 +14,13 @@ matching stable branch (i.e. 6-1-stable) of the Gitlab application.
 The 6.1.x release is not backwards compatible with previous versions targeting
 Gitlab master.
 
-For the initial 6.1.x release of the cookbook, the default Ruby will
-be 1.9.3 compiled with [ruby_build](http://fnichol.github.com/chef-ruby_build/).
-Using a compiled 1.9.3 Ruby follows the Gitlab installation guidelines upstream.
+For the 7.7.x release of the cookbook, the default Ruby will
+be 2.1.2 compiled with [ruby_build](http://fnichol.github.com/chef-ruby_build/).
+Using a compiled Ruby follows the Gitlab installation guidelines upstream.
 If you have a better approach which reduced complexity or reduces converge time,
 please open a pull request on Github.
 
-The application home has moved from `/var/gitlab/gitlab` to `/srv/git/gitlab`
+The application home is located in `/srv/git/gitlab`
 in accordance with the [Filesystem Hierarchy Standard (FHS) version 2.3](http://www.pathname.com/fhs/).
 
 ## Requirements
