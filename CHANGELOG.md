@@ -1,6 +1,23 @@
 Gitlab Cookbook Changelog
 =========================
 
+v7.7.0
+------
+
+* Credit to @jeremyolliver for doing most of the work for an 7.x release.
+  - gitlab branch targets 7-7-stable.
+  - gitlab shell branch targets 2.4.1.
+  - Ruby version is 2.1.2.
+* mysql cookbook 6.0 related changes.
+  - This is a potentially breaking change.  The gitlab::mysql recipe now sets up
+    a mysql server since the mysql::server recipe no longer exists in the 6.0
+    version of the mysql cookbook.
+  - A future release of this cookbook may separate the duties of the mysql server, and
+    the mysql database initialization for gitlab.
+  - NOTE the database initialization for postgres remains unchanged, and backwards
+    compatible with prior releases.
+    
+
 v6.9.0
 ------
 
