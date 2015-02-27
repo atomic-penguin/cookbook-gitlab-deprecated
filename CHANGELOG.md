@@ -1,6 +1,11 @@
 Gitlab Cookbook Changelog
 =========================
 
+v7.7.1
+------
+
+* Closes #90, incorrect instance variable in template.
+
 v7.7.0
 ------
 

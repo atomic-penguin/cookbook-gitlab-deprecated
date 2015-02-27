@@ -16,7 +16,7 @@ production: &base
   gitlab:
     ## Web server settings
     host: <%= @fqdn %>
-    port: <%= @port %>
+    port: <%= @listen_port %>
     https: <%= @https_boolean %>
 
     # Uncomment and customize the last line to run in a non-root path

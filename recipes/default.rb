@@ -151,7 +151,7 @@ template node['gitlab']['shell']['home'] + '/config.yml' do
   source 'shell_config.yml.erb'
   variables(
     fqdn: api_fqdn,
-    listen: listen_port
+    listen_port: listen_port
   )
 end
 
