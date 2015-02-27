@@ -2,7 +2,7 @@
 user: <%= node['gitlab']['user'] %>
 
 # Url to gitlab instance. Used for api calls. Should end with a slash.
-gitlab_url: "<%= node['gitlab']['https'] ? "https" : "http" %>://<%= @fqdn %>:<%= @listen %>/" 
+gitlab_url: "<%= node['gitlab']['https'] ? "https" : "http" %>://<%= @fqdn %>:<%= @listen_port %>/" 
 
 http_settings:
 #  user: someone
