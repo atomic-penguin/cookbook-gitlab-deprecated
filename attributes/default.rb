@@ -48,6 +48,7 @@ default['gitlab']['database']['adapter'] = node['gitlab']['database']['type'] ==
 default['gitlab']['database']['encoding'] = node['gitlab']['database']['type'] == 'mysql' ? 'utf8' : 'unicode'
 default['gitlab']['database']['collation'] = 'utf8_general_ci'
 default['gitlab']['database']['host'] = '127.0.0.1'
+default['gitlab']['database']['socket'] = '/var/run/mysqld/mysqld.sock'
 default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
