@@ -27,6 +27,7 @@ default['gitlab']['web_fqdn'] = nil
 default['gitlab']['nginx_server_names'] = ['gitlab.*', node['fqdn']]
 default['gitlab']['email_from'] = "gitlab@#{node['domain']}"
 default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
+default['gitlab']['unicorn']['timeout'] = 60
 
 # User default privileges
 default['gitlab']['default_projects_limit'] = 10
