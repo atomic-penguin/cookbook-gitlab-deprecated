@@ -42,6 +42,7 @@ default['gitlab']['git_branch'] = '7-7-stable'
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'git://github.com/gitlabhq/gitlab-shell.git'
 default['gitlab']['shell']['git_branch'] = 'v2.4.1'
+default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
 default['gitlab']['database']['type'] = 'mysql'
