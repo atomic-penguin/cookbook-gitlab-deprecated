@@ -140,8 +140,8 @@ end
 # Either listen_port has been configured elsewhere or we calculate it depending on the https flag
 listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
 
-# Address of gitlab api for which gitlab-shell should connect
-api_fqdn = node['gitlab']['web_fqdn'] || node['fqdn']
+# Address of gitlab api for which gitlab-shell should connect, prefered is using custom URL
+api_fqdn = node['gitlab']['shell']['gitlab_host'] || node['gitlab']['web_fqdn'] || node['fqdn']
 
 # render gitlab-shell config
 template node['gitlab']['shell']['home'] + '/config.yml' do
