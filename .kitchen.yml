@@ -19,11 +19,16 @@ platforms:
     - ["forwarded_port", {guest: 443, host: 8444}]
   run_list:
   - recipe[apt]
-- name: centos-6.5
+- name: centos-7.1
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8082}]
     - ["forwarded_port", {guest: 443, host: 8445}]
+- name: centos-6.6
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8083}]
+    - ["forwarded_port", {guest: 443, host: 8446}]
 
 suites:
 - name: default
