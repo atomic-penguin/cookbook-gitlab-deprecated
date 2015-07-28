@@ -351,11 +351,6 @@ nginx_site 'gitlab' do
   enable true
 end
 
-# Disable default site
-nginx_site 'default' do
-  enable false
-end
-
 # Enable and start unicorn and sidekiq service
 service 'gitlab' do
   priority 30
