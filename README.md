@@ -258,7 +258,7 @@ override_attributes "gitlab" => {
   "https" => true,
   "certificate_databag_id" => "wildcard"
 }
-run_list "recipe[mysql::server]", "recipe[gitlab]
+run_list "recipe[gitlab]"
 ```
 
 License and Author
