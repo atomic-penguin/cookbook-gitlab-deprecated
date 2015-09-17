@@ -1,5 +1,7 @@
 ## Gitlab Cookbook
 
+This is a fork of the original Gitlab Cookbook with a minor modification to make pgsql compatible with AWS.
+
 [![Build Status](https://travis-ci.org/atomic-penguin/cookbook-gitlab.png?branch=master)](https://travis-ci.org/atomic-penguin/cookbook-gitlab)
 
 This cookbook will deploy gitlab; a free project and repository management

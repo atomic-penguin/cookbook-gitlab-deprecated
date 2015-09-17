@@ -31,13 +31,14 @@ end
 # Helper variables
 database = node['gitlab']['database']['database']
 database_user = node['gitlab']['database']['username']
+database_aws_user = node['postgresql']['username']
 database_password = node['gitlab']['database']['password']
 database_host = node['gitlab']['database']['host']
 database_userhost = node['gitlab']['database']['userhost']
 database_connection = {
   host: database_host,
   port: '5432',
-  username: 'postgres',
+  username: database_aws_user,
   password: node['postgresql']['password']['postgres']
 }
 

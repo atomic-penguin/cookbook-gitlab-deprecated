@@ -1,6 +1,10 @@
 Gitlab Cookbook Changelog
 =========================
 
+v7.7.1-Fork
+-----------
+* Add customizable pgsql username for AWS RDS compatibility.
+
 v7.7.1
 ------
 
