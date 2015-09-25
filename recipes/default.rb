@@ -174,7 +174,8 @@ template '/etc/init.d/gitlab' do
   source 'gitlab.init.erb'
   variables(
     gitlab_app_home: node['gitlab']['app_home'],
-    gitlab_user: node['gitlab']['user']
+    gitlab_user: node['gitlab']['user'],
+    gitlab_redis_instance: node['gitlab']['redis_instance']
   )
 end
 
@@ -352,9 +353,9 @@ nginx_site 'gitlab' do
 end
 
 # Disable default site
-nginx_site 'default' do
-  enable false
-end
+#nginx_site 'default' do
+#  enable false
+#end
 
 # Enable and start unicorn and sidekiq service
 service 'gitlab' do

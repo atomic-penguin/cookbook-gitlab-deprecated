@@ -63,6 +63,9 @@ default['gitlab']['cookbook_dependencies'] = %w(
   logrotate redisio::default redisio::enable ruby_build
 )
 
+# Redisio instance name
+default['gitlab']['redis_instance'] = 'redis-server'
+
 # Required packages for Gitlab
 case node['platform_family']
 when 'debian'
