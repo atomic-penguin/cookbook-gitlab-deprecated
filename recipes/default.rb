@@ -35,6 +35,10 @@ else
   Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
 end
 
+# Install SELinux tools where appropriate
+extend SELinuxPolicy::Helpers
+include_recipe 'selinux_policy::install' if use_selinux
+
 # Install the required packages via cookbook
 node['gitlab']['cookbook_dependencies'].each do |requirement|
   include_recipe requirement
@@ -60,6 +64,11 @@ directory node['gitlab']['home'] do
   mode '0755'
 end
 
+# Treat gitlab home as regular home for SELinux
+selinux_policy_fcontext node['gitlab']['home'] do
+  secontext 'user_home_dir_t'
+end
+
 # Create a $HOME/.ssh folder
 directory "#{node['gitlab']['home']}/.ssh" do
   owner node['gitlab']['user']
@@ -71,6 +80,26 @@ file "#{node['gitlab']['home']}/.ssh/authorized_keys" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode '0600'
+end
+
+# Allow SSH connections under SELinux
+selinux_policy_fcontext "#{node['gitlab']['home']}/.ssh(/.*)?" do
+  secontext 'ssh_home_t'
+end
+
+# Allow SSH key generation via /tmp under SELinux
+selinux_policy_module 'gitlab-ssh' do
+  content <<-EOF
+    module gitlab-ssh 0.1;
+
+    require {
+      type ssh_keygen_t;
+      type initrc_tmp_t;
+      class file open;
+    }
+
+    allow ssh_keygen_t initrc_tmp_t:file open;
+  EOF
 end
 
 # Drop off git config
@@ -231,6 +260,25 @@ end
   end
 end
 
+# Allow nginx to connect to gitlab.socket under SELinux
+selinux_policy_fcontext "#{node['gitlab']['app_home']}/tmp/sockets(/.*)?" do
+  secontext 'httpd_var_run_t'
+end
+
+selinux_policy_module 'gitlab-nginx-socket' do
+  content <<-EOF
+    module gitlab-nginx-socket 0.1;
+
+    require {
+      type httpd_t;
+      type initrc_t;
+      class unix_stream_socket connectto;
+    }
+
+    allow httpd_t initrc_t:unix_stream_socket connectto;
+  EOF
+end
+
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
@@ -325,6 +373,11 @@ end
 
 # Install nginx
 include_recipe 'nginx'
+
+# Allow nginx to access static content under SELinux
+selinux_policy_fcontext "#{node['gitlab']['app_home']}/public(/.*)?" do
+  secontext 'httpd_sys_content_t'
+end
 
 # Render and activate nginx default vhost config
 template '/etc/nginx/sites-available/gitlab' do
