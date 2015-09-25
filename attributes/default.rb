@@ -116,6 +116,7 @@ default['gitlab']['ldap']['enabled'] = false
 default['gitlab']['ldap']['host'] = '_your_ldap_server'
 default['gitlab']['ldap']['base'] = '_the_base_where_you_search_for_users'
 default['gitlab']['ldap']['port'] = 636
+default['gitlab']['ldap']['active_directory'] = true
 default['gitlab']['ldap']['uid'] = 'sAMAccountName'
 default['gitlab']['ldap']['method'] = 'ssl'
 default['gitlab']['ldap']['bind_dn'] = '_the_full_dn_of_the_user_you_will_bind_with'
