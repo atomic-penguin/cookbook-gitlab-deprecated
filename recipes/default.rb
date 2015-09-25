@@ -323,8 +323,8 @@ certificate_manage 'gitlab' do
   only_if { node['gitlab']['https'] }
 end
 
-# Create nginx directories before dropping off templates
-include_recipe 'nginx::commons_dir'
+# Install nginx
+include_recipe 'nginx'
 
 # Render and activate nginx default vhost config
 template '/etc/nginx/sites-available/gitlab' do
@@ -343,9 +343,6 @@ template '/etc/nginx/sites-available/gitlab' do
     listen: "#{node['gitlab']['listen_ip']}:#{listen_port}"
   )
 end
-
-# Install nginx
-include_recipe 'nginx'
 
 # Enable gitlab site
 nginx_site 'gitlab' do
