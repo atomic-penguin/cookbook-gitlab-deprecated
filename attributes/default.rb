@@ -36,12 +36,12 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'git://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '7-13-stable'
+default['gitlab']['git_branch'] = '8-0-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'git://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v2.6.3'
+default['gitlab']['shell']['git_branch'] = 'v2.6.5'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -136,3 +136,7 @@ default['build-essential']['compile_time'] = true # needed for mysql chef_gem
 
 # nginx
 default['nginx']['default_site_enabled'] = false
+
+# Gitlab git http server
+default['gitlab']['git_http_server_revision'] = 'master'
+default['gitlab']['git_http_server_repository'] = 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git'
