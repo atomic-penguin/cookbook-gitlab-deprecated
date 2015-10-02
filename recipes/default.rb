@@ -247,6 +247,16 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   )
 end
 
+# Render gitlab secrets file
+template "#{node['gitlab']['app_home']}/config/secrets.yml" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0600'
+  variables(
+    production_db_key_base: node[:gitlab][:secrets][:production_db_key_base]
+  )
+end
+
 # Copy file rack_attack.rb
 cookbook_file "#{node['gitlab']['app_home']}/config/initializers/rack_attack.rb" do
   owner node['gitlab']['user']
