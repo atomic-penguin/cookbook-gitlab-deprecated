@@ -269,6 +269,57 @@ override_attributes "gitlab" => {
 run_list "recipe[gitlab]"
 ```
 
+
+Upgrade
+=======
+
+As of now it's not supported in the cookbook out of the box, however following steps document this process.
+
+## Upgrade from chef cookbook higher version
+
+To upgrade Gitlab version make sure you:
+
+* upload new gitlab cookbook to chef server
+* override node attributes (example for Gitlab 8.x):
+    ```
+    override['gitlab']['git_branch']                             = '8-0-stable'
+    override['gitlab']['shell']['git_branch']                    = 'v2.6.5'
+    override['languages']['ruby']['default_version']             = '2.1.6'
+    ```
+* Follow appropriate steps on official gitlab docs: http://doc.gitlab.com/ce/update/7.14-to-8.0.html
+
+You may skip merging all configuration files, init.d scripts etc.
+
+In general this procedure consist of following steps:
+
+```
+sudo service gitlab stop
+sudo su - git
+cd /srv/git/gitlab
+# bundle install
+bundle exec rake gitlab:backup:create RAILS_ENV=production
+git fetch --all
+git checkout -- db/schema.rb # local changes will be restored automatically
+git checkout 8-0-stable
+cd /srv/git/gitlab-shell
+git fetch
+git checkout v2.6.5
+# for 8x somewhere here should gitlab cookbook generate new configuration files
+# MySQL installations
+bundle install --without postgres development test --deployment
+# PostgreSQL installations
+bundle install --without mysql development test --deployment
+bundle exec rake db:migrate RAILS_ENV=production
+bundle exec rake assets:clean assets:precompile cache:clear RAILS_ENV=production
+sudo service gitlab start
+sudo service nginx restart
+```
+
+NOTE: Don't forget to make trusted backups first!
+
+
+
+
 License and Author
 ==================
 
