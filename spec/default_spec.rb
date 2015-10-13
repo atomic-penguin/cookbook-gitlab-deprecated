@@ -4,6 +4,13 @@ describe 'gitlab::default' do
   before do
     stub_command('git --version >/dev/null').and_return(true)
     stub_command('which nginx').and_return(true)
+    
+    %w(go godoc gofmt).each do |l|
+        stub_command("test -e /usr/local/bin/#{l}").and_return(false)
+        stub_command("test -e /usr/local/go/bin/#{l}").and_return(true)
+        #File.stub(:exists?).with("/usr/bin/#{l}").and_return(false)
+        #File.stub(:exists?).with("/usr/local/bin/#{l}").and_return(true)
+    end
   end
 
   context 'on Centos 6.5 with mysql and https' do

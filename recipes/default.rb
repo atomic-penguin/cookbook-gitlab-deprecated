@@ -391,6 +391,8 @@ end
     to "/usr/local/go/bin/#{l}"
     not_if "test -e /usr/local/bin/#{l}"
     only_if "test -e /usr/local/go/bin/#{l}"
+    #not_if {File.exists?("/usr/local/bin/#{l}")}
+    #only_if {File.exists?("/usr/local/go/bin/#{l}")}
   end
 end
 
