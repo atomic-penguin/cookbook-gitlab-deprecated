@@ -254,7 +254,7 @@ template "#{node['gitlab']['app_home']}/config/secrets.yml" do
   group node['gitlab']['group']
   mode '0600'
   variables(
-    production_db_key_base: node[:gitlab][:secrets][:production_db_key_base]
+    production_db_key_base: node['gitlab']['secrets']['production_db_key_base']
   )
 end
 
@@ -378,7 +378,7 @@ end
 
 bash 'extract_golang' do
   action :run
-  cwd ::File.dirname("#{node[:gitlab][:home]}")
+  cwd ::File.dirname(node['gitlab']['home'])
   code <<-EOH
     tar -C /usr/local -xzf #{temp_golangpkg}
     rm -f #{temp_golangpkg}
@@ -395,25 +395,25 @@ end
 end
 
 # Install gitlab git http server
-git "#{node[:gitlab][:home]}/gitlab-git-http-server" do
+git "#{node['gitlab']['home']}/gitlab-git-http-server" do
   # default repository 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git
-  repository node[:gitlab][:git_http_server_repository]
-  revision node[:gitlab][:git_http_server_revision]
+  repository node['gitlab']['git_http_server_repository']
+  revision node['gitlab']['git_http_server_revision']
   action :sync
-  user node[:gitlab][:user]
-  group node[:gitlab][:group]
+  user node['gitlab']['user']
+  group node['gitlab']['group']
   notifies :run, 'bash[compile-git-http-server]', :immediately
 end
 
 bash 'compile-git-http-server' do
   action :run
-  cwd "#{node[:gitlab][:home]}/gitlab-git-http-server"
+  cwd "#{node['gitlab']['home']}/gitlab-git-http-server"
   code <<-EOH
     make
     EOH
-  user node[:gitlab][:user]
-  group node[:gitlab][:group]
-  not_if { ::File.exist?("#{node[:gitlab][:home]}/gitlab-git-http-server/gitlab-git-http-server") }
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-git-http-server/gitlab-git-http-server") }
 end
 
 # Precompile assets

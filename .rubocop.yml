@@ -1,3 +1,9 @@
+LineLength:
+    Max: 125
+SingleSpaceBeforeFirstArg:
+    Exclude:
+    - metadata.rb
+
 AllCops:
   Exclude:
     - '.kitchen/*'

@@ -128,7 +128,7 @@ default['gitlab']['ldap']['allow_username_or_email_login'] = true
 default['gitlab']['ldap']['user_filter'] = ''
 
 # Secrets
-default[:gitlab][:secrets][:production_db_key_base] = 'production' # UPDATE THIS, at least 30 chars. Used to encrypt Variables.
+default['gitlab']['secrets']['production_db_key_base'] = 'production' # UPDATE THIS, at least 30 chars. Used to encrypt Variables.
 
 # Gravatar
 default['gitlab']['gravatar']['enabled'] = true
