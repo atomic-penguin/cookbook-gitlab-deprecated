@@ -160,7 +160,7 @@ end
 # Clone Gitlab-shell repo
 git node['gitlab']['shell']['home'] do
   repository node['gitlab']['shell']['git_url']
-  reference node['gitlab']['shell']['git_branch']
+  revision node['gitlab']['shell']['git_branch']
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
@@ -192,7 +192,7 @@ end
 # Clone Gitlab repo from github
 git node['gitlab']['app_home'] do
   repository node['gitlab']['git_url']
-  reference node['gitlab']['git_branch']
+  revision node['gitlab']['git_branch']
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
