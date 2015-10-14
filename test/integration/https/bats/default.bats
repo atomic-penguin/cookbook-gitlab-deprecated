@@ -8,8 +8,23 @@
   pgrep redis-server
 }
 
+
 @test 'mysql schema is initialized and has projects* tables' {
-  echo 'show tables;' | mysql -u root --password='test' gitlab | grep 'projects'
+  for PREFIX in '/var/lib' '/var/run'; do
+    test -z $SOCK || break
+    for INSTANCE in 'mysql' 'mysql-default'; do
+      test -z $SOCK || break
+      for SOCKNAME in 'mysql' 'mysqld'; do
+        SOCK=$PREFIX/$INSTANCE/$SOCKNAME.sock
+        test -e $SOCK && {
+            export SOCK
+            break
+        }
+        unset SOCK
+      done
+    done
+  done
+  echo 'show tables;' | mysql -S $SOCK -u root --password='test' gitlab | grep 'projects'
 }
 
 @test 'nginx is running' {
