@@ -1,6 +1,13 @@
 Gitlab Cookbook Changelog
 =========================
 
+v8.0.1
+------
+
+* Merge all pull requests in the queue
+* Upgrade to gitlab 8-0-stable branch (update configuration, new gitlab-git-http-server, security.yml)
+* In Fix 8.0.1 - Update gitlab.init.erb
+
 v7.7.1
 ------
 

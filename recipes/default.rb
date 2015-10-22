@@ -35,6 +35,10 @@ else
   Chef::Log.error "#{node['gitlab']['database']['type']} is not a valid type. Please use 'mysql' or 'postgres'!"
 end
 
+# Install SELinux tools where appropriate
+extend SELinuxPolicy::Helpers
+include_recipe 'selinux_policy::install' if use_selinux
+
 # Install the required packages via cookbook
 node['gitlab']['cookbook_dependencies'].each do |requirement|
   include_recipe requirement
@@ -60,6 +64,11 @@ directory node['gitlab']['home'] do
   mode '0755'
 end
 
+# Treat gitlab home as regular home for SELinux
+selinux_policy_fcontext node['gitlab']['home'] do
+  secontext 'user_home_dir_t'
+end
+
 # Create a $HOME/.ssh folder
 directory "#{node['gitlab']['home']}/.ssh" do
   owner node['gitlab']['user']
@@ -71,6 +80,26 @@ file "#{node['gitlab']['home']}/.ssh/authorized_keys" do
   owner node['gitlab']['user']
   group node['gitlab']['group']
   mode '0600'
+end
+
+# Allow SSH connections under SELinux
+selinux_policy_fcontext "#{node['gitlab']['home']}/.ssh(/.*)?" do
+  secontext 'ssh_home_t'
+end
+
+# Allow SSH key generation via /tmp under SELinux
+selinux_policy_module 'gitlab-ssh' do
+  content <<-EOF
+    module gitlab-ssh 0.1;
+
+    require {
+      type ssh_keygen_t;
+      type initrc_tmp_t;
+      class file open;
+    }
+
+    allow ssh_keygen_t initrc_tmp_t:file open;
+  EOF
 end
 
 # Drop off git config
@@ -131,17 +160,22 @@ end
 # Clone Gitlab-shell repo
 git node['gitlab']['shell']['home'] do
   repository node['gitlab']['shell']['git_url']
-  reference node['gitlab']['shell']['git_branch']
+  revision node['gitlab']['shell']['git_branch']
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
 end
 
-# Either listen_port has been configured elsewhere or we calculate it depending on the https flag
-listen_port = node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
+# Either listen_port has been configured elsewhere or we calculate it
+# depending on the https flag
+listen_port = \
+  node['gitlab']['listen_port'] || (node['gitlab']['https'] ? 443 : 80)
 
-# Address of gitlab api for which gitlab-shell should connect
-api_fqdn = node['gitlab']['web_fqdn'] || node['fqdn']
+# Address of gitlab api for which gitlab-shell should connect, prefered is
+# using custom URL. If prefered URL is defined we are using 'gitlab_host'
+# otherwise we just refer back to 'web_fqdn'.
+api_fqdn = \
+  node['gitlab']['shell']['gitlab_host'] || node['gitlab']['web_fqdn']
 
 # render gitlab-shell config
 template node['gitlab']['shell']['home'] + '/config.yml' do
@@ -158,7 +192,7 @@ end
 # Clone Gitlab repo from github
 git node['gitlab']['app_home'] do
   repository node['gitlab']['git_url']
-  reference node['gitlab']['git_branch']
+  revision node['gitlab']['git_branch']
   action :checkout
   user node['gitlab']['user']
   group node['gitlab']['group']
@@ -173,8 +207,10 @@ template '/etc/init.d/gitlab' do
   mode '0755'
   source 'gitlab.init.erb'
   variables(
+    gitlab_home: node['gitlab']['home'],
     gitlab_app_home: node['gitlab']['app_home'],
-    gitlab_user: node['gitlab']['user']
+    gitlab_user: node['gitlab']['user'],
+    gitlab_redis_instance: node['gitlab']['redis_instance']
   )
 end
 
@@ -212,6 +248,16 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
   )
 end
 
+# Render gitlab secrets file
+template "#{node['gitlab']['app_home']}/config/secrets.yml" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0600'
+  variables(
+    production_db_key_base: node['gitlab']['secrets']['production_db_key_base']
+  )
+end
+
 # Copy file rack_attack.rb
 cookbook_file "#{node['gitlab']['app_home']}/config/initializers/rack_attack.rb" do
   owner node['gitlab']['user']
@@ -230,11 +276,33 @@ end
   end
 end
 
+# Allow nginx to connect to gitlab.socket under SELinux
+selinux_policy_fcontext "#{node['gitlab']['app_home']}/tmp/sockets(/.*)?" do
+  secontext 'httpd_var_run_t'
+end
+
+selinux_policy_module 'gitlab-nginx-socket' do
+  content <<-EOF
+    module gitlab-nginx-socket 0.1;
+
+    require {
+      type httpd_t;
+      type initrc_t;
+      class unix_stream_socket connectto;
+    }
+
+    allow httpd_t initrc_t:unix_stream_socket connectto;
+  EOF
+end
+
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
-  path ["#{node['gitlab']['app_home']}/log/*.log",
-        "#{node['gitlab']['shell']['home']}/gitlab-shell.log"]
+  su node['gitlab']['user']
+  path [
+    "#{node['gitlab']['app_home']}/log/*.log",
+    "#{node['gitlab']['shell']['home']}/gitlab-shell.log"
+  ]
   rotate 52
   options %w(compress delaycompress notifempty copytruncate)
 end
@@ -272,7 +340,8 @@ template "#{node['gitlab']['app_home']}/config/unicorn.rb" do
   mode '0644'
   variables(
     fqdn: node['fqdn'],
-    gitlab_app_home: node['gitlab']['app_home']
+    gitlab_app_home: node['gitlab']['app_home'],
+    gitlab_unicorn_timeout: node['gitlab']['unicorn']['timeout']
   )
 end
 
@@ -289,6 +358,64 @@ execute 'gitlab-bundle-install' do
   group node['gitlab']['group']
   environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
   not_if { File.exist?(bundle_success) }
+end
+
+# Install Gitlab Git HTTP server
+
+## get Go 1.5 # TODO, for future PR find cookbook for Go ie: https://github.com/NOX73/chef-golang
+golang_package = 'https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz'
+temp_golangpkg = '/tmp/gitlab_git_http_server.tar'
+
+remote_file temp_golangpkg do
+  source golang_package
+  # checksum node['']['']['checksum']
+  owner 'root'
+  group 'root'
+  mode '0755'
+  notifies :run, 'bash[extract_golang]', :immediately
+  not_if { ::File.exist?('/usr/local/bin/go') }
+end
+
+bash 'extract_golang' do
+  action :run
+  cwd ::File.dirname(node['gitlab']['home'])
+  code <<-EOH
+    tar -C /usr/local -xzf #{temp_golangpkg}
+    rm -f #{temp_golangpkg}
+    EOH
+  not_if { ::File.exist?('/usr/local/bin/go') }
+end
+
+%w(go godoc gofmt).each do |l|
+  link "/usr/local/bin/#{l}" do
+    to "/usr/local/go/bin/#{l}"
+    not_if "test -e /usr/local/bin/#{l}"
+    only_if "test -e /usr/local/go/bin/#{l}"
+    # not_if {File.exists?("/usr/local/bin/#{l}")}
+    # only_if {File.exists?("/usr/local/go/bin/#{l}")}
+  end
+end
+
+# Install gitlab git http server
+git "#{node['gitlab']['home']}/gitlab-git-http-server" do
+  # default repository 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git
+  repository node['gitlab']['git_http_server_repository']
+  revision node['gitlab']['git_http_server_revision']
+  action :sync
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  notifies :run, 'bash[compile-git-http-server]', :immediately
+end
+
+bash 'compile-git-http-server' do
+  action :run
+  cwd "#{node['gitlab']['home']}/gitlab-git-http-server"
+  code <<-EOH
+    make
+    EOH
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-git-http-server/gitlab-git-http-server") }
 end
 
 # Precompile assets
@@ -322,8 +449,13 @@ certificate_manage 'gitlab' do
   only_if { node['gitlab']['https'] }
 end
 
-# Create nginx directories before dropping off templates
-include_recipe 'nginx::commons_dir'
+# Install nginx
+include_recipe 'nginx'
+
+# Allow nginx to access static content under SELinux
+selinux_policy_fcontext "#{node['gitlab']['app_home']}/public(/.*)?" do
+  secontext 'httpd_sys_content_t'
+end
 
 # Render and activate nginx default vhost config
 template '/etc/nginx/sites-available/gitlab' do
@@ -343,17 +475,9 @@ template '/etc/nginx/sites-available/gitlab' do
   )
 end
 
-# Install nginx
-include_recipe 'nginx'
-
 # Enable gitlab site
 nginx_site 'gitlab' do
   enable true
-end
-
-# Disable default site
-nginx_site 'default' do
-  enable false
 end
 
 # Enable and start unicorn and sidekiq service

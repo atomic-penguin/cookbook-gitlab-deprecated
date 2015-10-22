@@ -12,18 +12,29 @@ platforms:
     - ["forwarded_port", {guest: 443, host: 8443}]
   run_list:
   - recipe[apt]
+  #attributes:
+    #apt:
+    #- compile_time_update: true
 - name: ubuntu-12.04
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8081}]
     - ["forwarded_port", {guest: 443, host: 8444}]
   run_list:
-  - recipe[apt]
-- name: centos-6.5
+    - recipe[apt]
+  #attributes:
+    #apt:
+    #- compile_time_update: true
+- name: centos-7.1
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8082}]
     - ["forwarded_port", {guest: 443, host: 8445}]
+- name: centos-6.6
+  driver_config:
+    network:
+    - ["forwarded_port", {guest: 80, host: 8083}]
+    - ["forwarded_port", {guest: 443, host: 8446}]
 
 suites:
 - name: default
