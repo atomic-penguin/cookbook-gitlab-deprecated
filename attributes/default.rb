@@ -36,12 +36,12 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'git://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '8-0-stable'
+default['gitlab']['git_branch'] = '8-5-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'git://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v2.6.5'
+default['gitlab']['shell']['git_branch'] = 'v2.6.10'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -59,7 +59,7 @@ default['gitlab']['postgresql']['username'] = 'postgres'
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '2.1.6'
+default['gitlab']['install_ruby'] = '2.1.8'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib readline ncurses openssh
