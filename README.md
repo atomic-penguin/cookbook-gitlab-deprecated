@@ -77,7 +77,7 @@ Attributes
   - Gitlab support email, default `gitlab-support@ + node.fqdn`
 
 * `gitlab['git_url']`
-  - Github gitlab address, default git://github.com/gitlabhq/gitlabhq.git
+  - Github gitlab address, default https://github.com/gitlabhq/gitlabhq.git
 
 * `gitlab['git_branch']`
   - Defaults to stable GitlabHQ branch matching the major version of this cookbook. e.g. 6.1.x => 6-1-stable
