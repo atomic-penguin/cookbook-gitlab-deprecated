@@ -107,6 +107,10 @@ default['gitlab']['self_signed_cert'] = false
 default['gitlab']['ssl_certificate'] = "/etc/nginx/ssl/certs/#{node['fqdn']}.pem"
 default['gitlab']['ssl_certificate_key'] = "/etc/nginx/ssl/private/#{node['fqdn']}.key"
 
+# Backwards compatible ciphers needed for Java IDEs
+default['gitlab']['ssl_ciphers'] = 'ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4'
+default['gitlab']['ssl_protocols'] = 'TLSv1 TLSv1.1 TLSv1.2'
+
 default['gitlab']['backup_path'] = node['gitlab']['app_home'] + '/backups'
 default['gitlab']['backup_keep_time'] = 604_800
 
