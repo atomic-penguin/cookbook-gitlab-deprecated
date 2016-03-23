@@ -298,7 +298,7 @@ end
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
-  su node['gitlab']['user']
+  su node['gitlab']['user'] + ' ' + node['gitlab']['group']
   path [
     "#{node['gitlab']['app_home']}/log/*.log",
     "#{node['gitlab']['shell']['home']}/gitlab-shell.log"
