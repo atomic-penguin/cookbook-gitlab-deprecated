@@ -25,12 +25,12 @@ platforms:
   #attributes:
     #apt:
     #- compile_time_update: true
-- name: centos-7.1
+- name: centos-7.2
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8082}]
     - ["forwarded_port", {guest: 443, host: 8445}]
-- name: centos-6.6
+- name: centos-6.7
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8083}]

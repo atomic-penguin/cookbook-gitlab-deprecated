@@ -5,6 +5,8 @@ description 'Installs/Configures gitlab'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 name 'gitlab'
 version '8.0.2'
+issues_url 'https://github.com/atomic-penguin/cookbook-gitlab/issues'
+source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 
 %w(build-essential zlib readline ncurses git openssh redisio xml
    ruby_build certificate database logrotate
