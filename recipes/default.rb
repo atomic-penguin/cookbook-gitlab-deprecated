@@ -295,6 +295,13 @@ selinux_policy_module 'gitlab-nginx-socket' do
   EOF
 end
 
+# Set SELinux context for log files, necessary for sendmail to work
+["#{node['gitlab']['app_home']}/log(/.*)?", "#{node['gitlab']['shell']['home']}/gitlab-shell\\.log.*"].each do |path|
+  selinux_policy_fcontext path do
+    secontext 'var_log_t'
+  end
+end
+
 # logrotate gitlab-shell and gitlab
 logrotate_app 'gitlab' do
   frequency 'weekly'
