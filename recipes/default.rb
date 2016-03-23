@@ -478,6 +478,8 @@ template '/etc/nginx/sites-available/gitlab' do
     https_boolean: node['gitlab']['https'],
     ssl_certificate: node['gitlab']['ssl_certificate'],
     ssl_certificate_key: node['gitlab']['ssl_certificate_key'],
+    ssl_ciphers: node['gitlab']['ssl_ciphers'],
+    ssl_protocols: node['gitlab']['ssl_protocols'],
     listen: "#{node['gitlab']['listen_ip']}:#{listen_port}"
   )
 end
