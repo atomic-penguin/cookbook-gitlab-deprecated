@@ -55,6 +55,7 @@ default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
 default['gitlab']['database']['userhost'] = '127.0.0.1'
 default['gitlab']['postgresql']['username'] = 'postgres'
+default['gitlab']['database']['password'] = 'changeme'
 
 # Ruby setup
 include_attribute 'ruby_build'
@@ -81,7 +82,7 @@ when 'rhel'
   default['gitlab']['packages'] = %w(
     libyaml-devel openssl-devel gdbm-devel libffi-devel
     curl libcurl-devel libicu-devel wget python-docutils sudo
-    cmake krb5-devel pkgconfig nodejs
+    cmake krb5-devel pkgconfig nodejs jemalloc jemalloc-devel
   )
 else
   default['gitlab']['install_ruby'] = 'package'
