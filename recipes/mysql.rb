@@ -45,10 +45,12 @@ database_user = node['gitlab']['database']['username']
 database_password = node['gitlab']['database']['password']
 database_userhost = node['gitlab']['database']['userhost']
 database_host = node['gitlab']['database']['host']
+database_host = node['gitlab']['database']['socket']
 database_connection = {
   host: database_host,
   username: 'root',
-  password: node['mysql']['server_root_password']
+  password: node['mysql']['server_root_password'],
+  socket: node['mysql']['socket']
 }
 
 # Create the database

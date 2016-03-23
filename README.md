@@ -174,6 +174,10 @@ is calculated.
   - Options: "mysql", "postgresql"
   - Default (varies based on `type`)
 
+* `gitlab['database']['socket']`
+  - The socket to use for connection
+  - Default /var/run/mysqld/mysqld.sock
+
 * `gitlab['database']['encoding']`
   - The database encoding
   - Default (varies based on `type`)
