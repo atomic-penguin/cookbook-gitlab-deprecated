@@ -8,9 +8,24 @@ version '8.5.0'
 issues_url 'https://github.com/atomic-penguin/cookbook-gitlab/issues'
 source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 
-%w(build-essential zlib readline ncurses git openssh redisio xml
-   ruby_build certificate database logrotate
-   postgresql apt yum-epel selinux_policy).each do |cb_depend|
+%w(
+  apt
+  build-essential
+  certificate
+  database
+  git
+  logrotate
+  ncurses
+  openssh
+  postgresql
+  readline
+  redisio
+  ruby_build
+  selinux_policy
+  xml
+  yum-epel
+  zlib
+).each do |cb_depend|
   depends cb_depend
 end
 depends 'mysql', '~> 6.0'

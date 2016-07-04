@@ -64,26 +64,53 @@ default['ruby_build']['upgrade'] = 'sync'
 default['gitlab']['install_ruby'] = '2.1.8'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
-  zlib readline ncurses openssh
-  logrotate redisio::default redisio::enable ruby_build
+  zlib
+  readline
+  ncurses
+  openssh
+  logrotate
+  redisio::default
+  redisio::enable
+  ruby_build
 )
 
 # Redisio instance name
 default['gitlab']['redis_instance'] = 'redis-server'
 
 # Required packages for Gitlab
+default['gitlab']['packages'] = %w(
+  cmake
+  curl
+  nodejs
+  python-docutils
+  sudo
+  wget
+)
 case node['platform_family']
 when 'debian'
-  default['gitlab']['packages'] = %w(
-    libyaml-dev libssl-dev libgdbm-dev libffi-dev checkinstall
-    curl libcurl4-openssl-dev libicu-dev wget python-docutils sudo
-    cmake libkrb5-dev pkg-config nodejs
+  default['gitlab']['packages'] += %w(
+    checkinstall
+    libcurl4-openssl-dev
+    libffi-dev
+    libgdbm-dev
+    libicu-dev
+    libkrb5-dev
+    libssl-dev
+    libyaml-dev
+    pkg-config
   )
 when 'rhel'
-  default['gitlab']['packages'] = %w(
-    libyaml-devel openssl-devel gdbm-devel libffi-devel
-    curl libcurl-devel libicu-devel wget python-docutils sudo
-    cmake krb5-devel pkgconfig nodejs jemalloc jemalloc-devel
+  default['gitlab']['packages'] += %w(
+    gdbm-devel
+    jemalloc
+    jemalloc-devel
+    krb5-devel
+    libcurl-devel
+    libffi-devel
+    libicu-devel
+    libyaml-devel
+    openssl-devel
+    pkgconfig
   )
 end
 
