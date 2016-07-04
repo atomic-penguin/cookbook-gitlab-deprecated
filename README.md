@@ -234,6 +234,17 @@ is calculated.
   - You can provide a query string here to filter which users will be selected
   - Default: ""
 
+Recipes
+=======
+
+## default
+
+This installs and starts GitLab with nginx and your chosen database.
+
+## mysql, postgres
+
+These are internal, set `gitlab['database']['type']` instead.
+
 Usage
 =====
 
