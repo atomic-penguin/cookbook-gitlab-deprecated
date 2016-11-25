@@ -85,20 +85,6 @@ when 'rhel'
     curl libcurl-devel libicu-devel wget python-docutils sudo
     cmake krb5-devel pkgconfig nodejs jemalloc jemalloc-devel
   )
-else
-  default['gitlab']['install_ruby'] = 'package'
-  default['gitlab']['cookbook_dependencies'] = %w(
-    openssh readline zlib ruby_build
-    redisio::default redisio::enable
-  )
-  default['gitlab']['packages'] = %w(
-    autoconf binon flex gcc gcc-c++ make m4 cmake
-    git
-    zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
-    libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
-    redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev
-    libicu-dev python-docutils sudo libkrb5-dev pkg-config nodejs
-  )
 end
 
 default['gitlab']['trust_local_sshkeys'] = 'yes'
