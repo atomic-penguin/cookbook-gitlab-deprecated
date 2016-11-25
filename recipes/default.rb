@@ -45,9 +45,7 @@ node['gitlab']['cookbook_dependencies'].each do |requirement|
 end
 
 # Install required packages for Gitlab
-node['gitlab']['packages'].each do |pkg|
-  package pkg
-end
+package node['gitlab']['packages']
 
 # Add a git user for Gitlab
 user node['gitlab']['user'] do
