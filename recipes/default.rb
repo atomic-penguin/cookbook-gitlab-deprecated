@@ -365,42 +365,6 @@ execute 'gitlab-bundle-install' do
   not_if { File.exist?(bundle_success) }
 end
 
-# Install Gitlab Git HTTP server
-
-## get Go 1.5 # TODO, for future PR find cookbook for Go ie: https://github.com/NOX73/chef-golang
-golang_package = 'https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz'
-temp_golangpkg = '/tmp/gitlab_git_http_server.tar'
-
-remote_file temp_golangpkg do
-  source golang_package
-  # checksum node['']['']['checksum']
-  owner 'root'
-  group 'root'
-  mode '0755'
-  notifies :run, 'bash[extract_golang]', :immediately
-  not_if { ::File.exist?('/usr/local/bin/go') }
-end
-
-bash 'extract_golang' do
-  action :run
-  cwd ::File.dirname(node['gitlab']['home'])
-  code <<-EOH
-    tar -C /usr/local -xzf #{temp_golangpkg}
-    rm -f #{temp_golangpkg}
-    EOH
-  not_if { ::File.exist?('/usr/local/bin/go') }
-end
-
-%w(go godoc gofmt).each do |l|
-  link "/usr/local/bin/#{l}" do
-    to "/usr/local/go/bin/#{l}"
-    not_if "test -e /usr/local/bin/#{l}"
-    only_if "test -e /usr/local/go/bin/#{l}"
-    # not_if {File.exists?("/usr/local/bin/#{l}")}
-    # only_if {File.exists?("/usr/local/go/bin/#{l}")}
-  end
-end
-
 # Install gitlab git http server
 git "#{node['gitlab']['home']}/gitlab-git-http-server" do
   # default repository 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git

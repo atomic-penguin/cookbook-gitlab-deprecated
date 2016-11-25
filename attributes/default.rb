@@ -81,6 +81,7 @@ default['gitlab']['redis_instance'] = 'redis-server'
 default['gitlab']['packages'] = %w(
   cmake
   curl
+  golang
   nodejs
   python-docutils
   sudo
