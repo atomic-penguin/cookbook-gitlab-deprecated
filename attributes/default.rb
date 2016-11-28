@@ -56,7 +56,7 @@ default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
 default['gitlab']['database']['userhost'] = '127.0.0.1'
 default['gitlab']['postgresql']['username'] = 'postgres'
-default['gitlab']['database']['password'] = 'changeme'
+default['gitlab']['database']['password'] = nil
 
 # Ruby setup
 include_attribute 'ruby_build'

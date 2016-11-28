@@ -19,13 +19,16 @@
 include_recipe 'database::postgresql'
 
 # Enable secure password generation
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless['gitlab']['database']['password'] = secure_password
-ruby_block 'save node data' do
-  block do
-    node.save
+unless node['gitlab']['database']['password']
+  require 'securerandom'
+  pw = SecureRandom.urlsafe_base64
+  node.normal['gitlab']['database']['password'] = pw
+
+  unless Chef::Config[:solo]
+    node2 = Chef::Node.load node.name
+    node2.normal['gitlab']['database']['password'] = pw
+    node2.save
   end
-  not_if { Chef::Config[:solo] }
 end
 
 # Helper variables
