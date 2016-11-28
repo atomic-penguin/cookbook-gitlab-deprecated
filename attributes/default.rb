@@ -26,22 +26,20 @@ default['gitlab']['app_home'] = default['gitlab']['home'] + '/gitlab'
 default['gitlab']['web_fqdn'] = node['fqdn']
 default['gitlab']['nginx_server_names'] = ['gitlab.*', node['fqdn']]
 default['gitlab']['email_from'] = "gitlab@#{node['domain']}"
-default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
 default['gitlab']['unicorn']['timeout'] = 60
 
 # User default privileges
-default['gitlab']['default_projects_limit'] = 10
 default['gitlab']['default_can_create_group'] = true
 default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'https://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '8-5-stable'
+default['gitlab']['git_branch'] = '8-14-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'https://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v2.6.10'
+default['gitlab']['shell']['git_branch'] = 'v4.0.2'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -60,7 +58,7 @@ default['gitlab']['database']['password'] = nil
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '2.1.8'
+default['gitlab']['install_ruby'] = '2.3.3'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib
@@ -149,9 +147,6 @@ default['gitlab']['ldap']['user_filter'] = ''
 # Secrets
 default['gitlab']['secrets']['production_db_key_base'] = 'production' # UPDATE THIS, at least 30 chars. Used to encrypt Variables.
 
-# Gravatar
-default['gitlab']['gravatar']['enabled'] = true
-
 # Mysql
 default['mysql']['server_root_password'] = 'Ch4ngm3'
 default['build-essential']['compile_time'] = true # needed for mysql chef_gem
@@ -162,6 +157,6 @@ default['postgresql']['contrib']['extensions'] = ['pg_trgm']
 # nginx
 default['nginx']['default_site_enabled'] = false
 
-# Gitlab git http server
-default['gitlab']['git_http_server_revision'] = 'master'
-default['gitlab']['git_http_server_repository'] = 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git'
+# GitLab Workhorse
+default['gitlab']['workhorse_revision'] = 'v1.0.1'
+default['gitlab']['workhorse_repository'] = 'https://gitlab.com/gitlab-org/gitlab-workhorse.git'

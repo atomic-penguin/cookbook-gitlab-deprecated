@@ -365,26 +365,26 @@ execute 'gitlab-bundle-install' do
   not_if { File.exist?(bundle_success) }
 end
 
-# Install gitlab git http server
-git "#{node['gitlab']['home']}/gitlab-git-http-server" do
-  # default repository 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git
-  repository node['gitlab']['git_http_server_repository']
-  revision node['gitlab']['git_http_server_revision']
+# Install GitLab Workhorse
+git "#{node['gitlab']['home']}/gitlab-workhorse" do
+  # default repository 'https://gitlab.com/gitlab-org/gitlab-workhorse.git
+  repository node['gitlab']['workhorse_repository']
+  revision node['gitlab']['workhorse_revision']
   action :sync
   user node['gitlab']['user']
   group node['gitlab']['group']
-  notifies :run, 'bash[compile-git-http-server]', :immediately
+  notifies :run, 'bash[compile-workhorse]', :immediately
 end
 
-bash 'compile-git-http-server' do
+bash 'compile-workhorse' do
   action :run
-  cwd "#{node['gitlab']['home']}/gitlab-git-http-server"
+  cwd "#{node['gitlab']['home']}/gitlab-workhorse"
   code <<-EOH
     make
     EOH
   user node['gitlab']['user']
   group node['gitlab']['group']
-  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-git-http-server/gitlab-git-http-server") }
+  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-workhorse/gitlab-workhorse") }
 end
 
 # Precompile assets
@@ -399,7 +399,11 @@ end
 
 # Initialize database
 execute 'gitlab-bundle-rake' do
-  command "#{bundler_binary} exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup"
+  # Check the task list below against setup.rake. We can't use
+  # gitlab:setup because db:reset DROPs the database and we don't want
+  # to give the database user permission to create new databases.
+  # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/tasks/gitlab/setup.rake
+  command "#{bundler_binary} exec rake db:schema:load add_limits_mysql setup_postgresql db:seed_fu RAILS_ENV=production && touch .gitlab-setup"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
