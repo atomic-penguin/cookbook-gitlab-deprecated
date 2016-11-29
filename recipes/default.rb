@@ -215,9 +215,9 @@ end
 # Write the database.yml
 template "#{node['gitlab']['app_home']}/config/database.yml" do
   source 'database.yml.erb'
-  owner node['gitlab']['user']
+  owner 'root'
   group node['gitlab']['group']
-  mode '0644'
+  mode '0640'
   variables(
     adapter: node['gitlab']['database']['adapter'],
     encoding: node['gitlab']['database']['encoding'],
