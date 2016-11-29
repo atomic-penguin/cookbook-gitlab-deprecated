@@ -144,9 +144,6 @@ default['gitlab']['ldap']['password'] = '_the_password_of_the_bind_user'
 default['gitlab']['ldap']['allow_username_or_email_login'] = true
 default['gitlab']['ldap']['user_filter'] = ''
 
-# Secrets
-default['gitlab']['secrets']['production_db_key_base'] = 'production' # UPDATE THIS, at least 30 chars. Used to encrypt Variables.
-
 # Mysql
 default['mysql']['server_root_password'] = 'Ch4ngm3'
 default['build-essential']['compile_time'] = true # needed for mysql chef_gem
