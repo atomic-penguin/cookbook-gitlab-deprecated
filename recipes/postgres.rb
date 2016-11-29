@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+include_recipe 'postgresql::server'
 include_recipe 'database::postgresql'
 
 # Enable secure password generation
@@ -31,38 +33,20 @@ unless node['gitlab']['database']['password']
   end
 end
 
-# Helper variables
-database = node['gitlab']['database']['database']
-database_user = node['gitlab']['database']['username']
-database_override_user = node['postgresql']['username']
-database_password = node['gitlab']['database']['password']
-database_host = node['gitlab']['database']['host']
-database_userhost = node['gitlab']['database']['userhost']
-database_connection = {
-  host: database_host,
-  port: '5432',
-  username: database_override_user,
-  password: node['postgresql']['password']['postgres']
-}
+# Create the database user
+postgresql_database_user node['gitlab']['database']['username'] do
+  connection :host => 'localhost'
+  password node['gitlab']['database']['password']
+  action :create
+end
 
 # Create the database
-postgresql_database database do
-  connection database_connection
+postgresql_database node['gitlab']['database']['database'] do
+  connection :host => 'localhost'
+  owner node['gitlab']['database']['username']
   action :create
 end
 
-# Create the database user
-postgresql_database_user database_user do
-  connection database_connection
-  password database_password
-  host database_userhost
-  database_name database
-  action :create
-end
-
-# Grant all privileges to user on database
-postgresql_database_user database_user do
-  connection database_connection
-  database_name database
-  action :grant
-end
+# FIXME: Add extension resource to postgresql cookbook
+node.force_override['postgresql']['database_name'] = node['gitlab']['database']['database']
+include_recipe 'postgresql::contrib'

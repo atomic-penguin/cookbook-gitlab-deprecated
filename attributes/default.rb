@@ -55,7 +55,6 @@ default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
 default['gitlab']['database']['userhost'] = '127.0.0.1'
-default['gitlab']['postgresql']['username'] = 'postgres'
 default['gitlab']['database']['password'] = nil
 
 # Ruby setup
@@ -156,6 +155,9 @@ default['gitlab']['gravatar']['enabled'] = true
 # Mysql
 default['mysql']['server_root_password'] = 'Ch4ngm3'
 default['build-essential']['compile_time'] = true # needed for mysql chef_gem
+
+# PostgreSQL
+default['postgresql']['contrib']['extensions'] = ['pg_trgm']
 
 # nginx
 default['nginx']['default_site_enabled'] = false
