@@ -112,6 +112,16 @@ when 'rhel'
   )
 end
 
+# How to install git? RHEL 7 can use End Point.
+default['gitlab']['git_recipe'] = value_for_platform(
+  %w( redhat centos scientific oracle ) => { '< 7' => 'source' },
+  'amazon' => { '>= 0' => 'source' },
+  'fedora' => { '< 24' => 'source' },
+  'debian' => { '< 9' => 'source' },
+  'ubuntu' => { '< 16.04' => 'source' },
+  'default' => 'package'
+)
+
 default['gitlab']['trust_local_sshkeys'] = 'yes'
 
 default['gitlab']['https'] = false

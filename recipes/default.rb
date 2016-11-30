@@ -25,6 +25,9 @@ when 'rhel'
   include_recipe 'yum-epel'
 end
 
+# Install new enough git version
+include_recipe 'gitlab::git'
+
 # Setup the database connection
 case node['gitlab']['database']['type']
 when 'mysql'
