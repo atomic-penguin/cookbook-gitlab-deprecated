@@ -26,22 +26,20 @@ default['gitlab']['app_home'] = default['gitlab']['home'] + '/gitlab'
 default['gitlab']['web_fqdn'] = node['fqdn']
 default['gitlab']['nginx_server_names'] = ['gitlab.*', node['fqdn']]
 default['gitlab']['email_from'] = "gitlab@#{node['domain']}"
-default['gitlab']['support_email'] = "gitlab-support@#{node['domain']}"
 default['gitlab']['unicorn']['timeout'] = 60
 
 # User default privileges
-default['gitlab']['default_projects_limit'] = 10
 default['gitlab']['default_can_create_group'] = true
 default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'https://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '8-5-stable'
+default['gitlab']['git_branch'] = '8-14-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'https://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v2.6.10'
+default['gitlab']['shell']['git_branch'] = 'v4.0.2'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -55,51 +53,74 @@ default['gitlab']['database']['pool'] = 5
 default['gitlab']['database']['database'] = 'gitlab'
 default['gitlab']['database']['username'] = 'gitlab'
 default['gitlab']['database']['userhost'] = '127.0.0.1'
-default['gitlab']['postgresql']['username'] = 'postgres'
-default['gitlab']['database']['password'] = 'changeme'
+default['gitlab']['database']['password'] = nil
 
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '2.1.8'
+default['gitlab']['install_ruby'] = '2.3.3'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
-  zlib readline ncurses openssh
-  logrotate redisio::default redisio::enable ruby_build
+  zlib
+  readline
+  ncurses
+  openssh
+  logrotate
+  redisio::default
+  redisio::enable
+  ruby_build
 )
 
 # Redisio instance name
 default['gitlab']['redis_instance'] = 'redis-server'
 
 # Required packages for Gitlab
+default['gitlab']['packages'] = %w(
+  cmake
+  curl
+  golang
+  nodejs
+  python-docutils
+  sudo
+  wget
+)
 case node['platform_family']
 when 'debian'
-  default['gitlab']['packages'] = %w(
-    libyaml-dev libssl-dev libgdbm-dev libffi-dev checkinstall
-    curl libcurl4-openssl-dev libicu-dev wget python-docutils sudo
-    cmake libkrb5-dev pkg-config nodejs
+  default['gitlab']['packages'] += %w(
+    checkinstall
+    libcurl4-openssl-dev
+    libffi-dev
+    libgdbm-dev
+    libicu-dev
+    libkrb5-dev
+    libssl-dev
+    libyaml-dev
+    pkg-config
   )
 when 'rhel'
-  default['gitlab']['packages'] = %w(
-    libyaml-devel openssl-devel gdbm-devel libffi-devel
-    curl libcurl-devel libicu-devel wget python-docutils sudo
-    cmake krb5-devel pkgconfig nodejs jemalloc jemalloc-devel
-  )
-else
-  default['gitlab']['install_ruby'] = 'package'
-  default['gitlab']['cookbook_dependencies'] = %w(
-    openssh readline zlib ruby_build
-    redisio::default redisio::enable
-  )
-  default['gitlab']['packages'] = %w(
-    autoconf binon flex gcc gcc-c++ make m4 cmake
-    git
-    zlib1g-dev libyaml-dev libssl-dev libgdbm-dev
-    libreadline-dev libncurses5-dev libffi-dev curl git-core openssh-server
-    redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev
-    libicu-dev python-docutils sudo libkrb5-dev pkg-config nodejs
+  default['gitlab']['packages'] += %w(
+    gdbm-devel
+    jemalloc
+    jemalloc-devel
+    krb5-devel
+    libcurl-devel
+    libffi-devel
+    libicu-devel
+    libyaml-devel
+    openssl-devel
+    pkgconfig
   )
 end
+
+# How to install git? RHEL 7 can use End Point.
+default['gitlab']['git_recipe'] = value_for_platform(
+  %w( redhat centos scientific oracle ) => { '< 7' => 'source' },
+  'amazon' => { '>= 0' => 'source' },
+  'fedora' => { '< 24' => 'source' },
+  'debian' => { '< 9' => 'source' },
+  'ubuntu' => { '< 16.04' => 'source' },
+  'default' => 'package'
+)
 
 default['gitlab']['trust_local_sshkeys'] = 'yes'
 
@@ -133,19 +154,16 @@ default['gitlab']['ldap']['password'] = '_the_password_of_the_bind_user'
 default['gitlab']['ldap']['allow_username_or_email_login'] = true
 default['gitlab']['ldap']['user_filter'] = ''
 
-# Secrets
-default['gitlab']['secrets']['production_db_key_base'] = 'production' # UPDATE THIS, at least 30 chars. Used to encrypt Variables.
-
-# Gravatar
-default['gitlab']['gravatar']['enabled'] = true
-
 # Mysql
 default['mysql']['server_root_password'] = 'Ch4ngm3'
 default['build-essential']['compile_time'] = true # needed for mysql chef_gem
 
+# PostgreSQL
+default['postgresql']['contrib']['extensions'] = ['pg_trgm']
+
 # nginx
 default['nginx']['default_site_enabled'] = false
 
-# Gitlab git http server
-default['gitlab']['git_http_server_revision'] = 'master'
-default['gitlab']['git_http_server_repository'] = 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git'
+# GitLab Workhorse
+default['gitlab']['workhorse_revision'] = 'v1.0.1'
+default['gitlab']['workhorse_repository'] = 'https://gitlab.com/gitlab-org/gitlab-workhorse.git'

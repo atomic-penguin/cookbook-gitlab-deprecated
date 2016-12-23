@@ -73,9 +73,6 @@ Attributes
 * `gitlab['email_from']`
   - Gitlab email from, default `gitlab@ + node.fqdn`
 
-* `gitlab['support_email']`
-  - Gitlab support email, default `gitlab-support@ + node.fqdn`
-
 * `gitlab['git_url']`
   - Github gitlab address, default https://github.com/gitlabhq/gitlabhq.git
 
@@ -128,11 +125,6 @@ Attributes
     See [nginx server_name documentation](http://nginx.org/en/docs/http/server_names.html)
     for valid matching patterns.
 
-* `gitlab['gravatar']['enabled']`
-  - Use Gravatar to fetch user avatars
-  - Options: "true", "false"
-  - Default "true"
-
 * `gitlab['unicorn']['timeout']`
   - Timeout in seconds to Unicorn
   - Default: 60
@@ -144,11 +136,6 @@ Attributes
 ### User privileges
 
 **Note**, This attributes are useful when you want only admins to create projects and groups. And to restrict username changing.
-
-* `gitlab['default_projects_limit']`
-  - When you create a user this value is their `projects_limit` profile setting.
-  - If you put it at 0, regular users can't create repos.
-  - Default, 10.
 
 * `gitlab['default_can_create_group']`
   - When you create a user this value is their `can_create_group` profile setting.

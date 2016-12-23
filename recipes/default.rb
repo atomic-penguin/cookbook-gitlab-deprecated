@@ -25,6 +25,9 @@ when 'rhel'
   include_recipe 'yum-epel'
 end
 
+# Install new enough git version
+include_recipe 'gitlab::git'
+
 # Setup the database connection
 case node['gitlab']['database']['type']
 when 'mysql'
@@ -45,9 +48,7 @@ node['gitlab']['cookbook_dependencies'].each do |requirement|
 end
 
 # Install required packages for Gitlab
-node['gitlab']['packages'].each do |pkg|
-  package pkg
-end
+package node['gitlab']['packages']
 
 # Add a git user for Gitlab
 user node['gitlab']['user'] do
@@ -217,9 +218,9 @@ end
 # Write the database.yml
 template "#{node['gitlab']['app_home']}/config/database.yml" do
   source 'database.yml.erb'
-  owner node['gitlab']['user']
+  owner 'root'
   group node['gitlab']['group']
-  mode '0644'
+  mode '0640'
   variables(
     adapter: node['gitlab']['database']['adapter'],
     encoding: node['gitlab']['database']['encoding'],
@@ -245,16 +246,6 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
     backup_path: node['gitlab']['backup_path'],
     backup_keep_time: node['gitlab']['backup_keep_time'],
     listen_port: listen_port
-  )
-end
-
-# Render gitlab secrets file
-template "#{node['gitlab']['app_home']}/config/secrets.yml" do
-  owner node['gitlab']['user']
-  group node['gitlab']['group']
-  mode '0600'
-  variables(
-    production_db_key_base: node['gitlab']['secrets']['production_db_key_base']
   )
 end
 
@@ -367,62 +358,26 @@ execute 'gitlab-bundle-install' do
   not_if { File.exist?(bundle_success) }
 end
 
-# Install Gitlab Git HTTP server
-
-## get Go 1.5 # TODO, for future PR find cookbook for Go ie: https://github.com/NOX73/chef-golang
-golang_package = 'https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz'
-temp_golangpkg = '/tmp/gitlab_git_http_server.tar'
-
-remote_file temp_golangpkg do
-  source golang_package
-  # checksum node['']['']['checksum']
-  owner 'root'
-  group 'root'
-  mode '0755'
-  notifies :run, 'bash[extract_golang]', :immediately
-  not_if { ::File.exist?('/usr/local/bin/go') }
-end
-
-bash 'extract_golang' do
-  action :run
-  cwd ::File.dirname(node['gitlab']['home'])
-  code <<-EOH
-    tar -C /usr/local -xzf #{temp_golangpkg}
-    rm -f #{temp_golangpkg}
-    EOH
-  not_if { ::File.exist?('/usr/local/bin/go') }
-end
-
-%w(go godoc gofmt).each do |l|
-  link "/usr/local/bin/#{l}" do
-    to "/usr/local/go/bin/#{l}"
-    not_if "test -e /usr/local/bin/#{l}"
-    only_if "test -e /usr/local/go/bin/#{l}"
-    # not_if {File.exists?("/usr/local/bin/#{l}")}
-    # only_if {File.exists?("/usr/local/go/bin/#{l}")}
-  end
-end
-
-# Install gitlab git http server
-git "#{node['gitlab']['home']}/gitlab-git-http-server" do
-  # default repository 'https://gitlab.com/gitlab-org/gitlab-git-http-server.git
-  repository node['gitlab']['git_http_server_repository']
-  revision node['gitlab']['git_http_server_revision']
+# Install GitLab Workhorse
+git "#{node['gitlab']['home']}/gitlab-workhorse" do
+  # default repository 'https://gitlab.com/gitlab-org/gitlab-workhorse.git
+  repository node['gitlab']['workhorse_repository']
+  revision node['gitlab']['workhorse_revision']
   action :sync
   user node['gitlab']['user']
   group node['gitlab']['group']
-  notifies :run, 'bash[compile-git-http-server]', :immediately
+  notifies :run, 'bash[compile-workhorse]', :immediately
 end
 
-bash 'compile-git-http-server' do
+bash 'compile-workhorse' do
   action :run
-  cwd "#{node['gitlab']['home']}/gitlab-git-http-server"
+  cwd "#{node['gitlab']['home']}/gitlab-workhorse"
   code <<-EOH
     make
     EOH
   user node['gitlab']['user']
   group node['gitlab']['group']
-  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-git-http-server/gitlab-git-http-server") }
+  not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-workhorse/gitlab-workhorse") }
 end
 
 # Precompile assets
@@ -437,7 +392,11 @@ end
 
 # Initialize database
 execute 'gitlab-bundle-rake' do
-  command "#{bundler_binary} exec rake gitlab:setup RAILS_ENV=production force=yes && touch .gitlab-setup"
+  # Check the task list below against setup.rake. We can't use
+  # gitlab:setup because db:reset DROPs the database and we don't want
+  # to give the database user permission to create new databases.
+  # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/tasks/gitlab/setup.rake
+  command "#{bundler_binary} exec rake db:schema:load add_limits_mysql setup_postgresql db:seed_fu RAILS_ENV=production && touch .gitlab-setup"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
