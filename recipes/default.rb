@@ -416,7 +416,7 @@ certificate_manage 'gitlab' do
 end
 
 # Install nginx
-include_recipe 'nginx'
+include_recipe 'chef_nginx'
 
 # Allow nginx to access static content under SELinux
 selinux_policy_fcontext "#{node['gitlab']['app_home']}/public(/.*)?" do

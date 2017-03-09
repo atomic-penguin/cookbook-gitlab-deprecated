@@ -28,9 +28,9 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 ).each do |cb_depend|
   depends cb_depend
 end
+depends 'chef_nginx', '~> 5.1'
 depends 'mysql', '~> 6.0'
 depends 'mysql2_chef_gem'
-depends 'nginx', '~> 2.7'
 
 %w(redhat centos scientific amazon debian ubuntu).each do |os|
   supports os
