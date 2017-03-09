@@ -380,14 +380,22 @@ bash 'compile-workhorse' do
   not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-workhorse/gitlab-workhorse") }
 end
 
-# Precompile assets
-execute 'gitlab-bundle-precompile-assets' do
-  command "#{bundler_binary} exec rake assets:precompile RAILS_ENV=production"
+nodejs_npm 'gitlab' do
+  path node['gitlab']['app_home']
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  options ['--only=production']
+  json true
+end
+
+# Compile assets
+execute 'gitlab-bundle-assets-compile' do
+  command "#{bundler_binary} exec rake gitlab:assets:compile RAILS_ENV=production NODE_ENV=production && touch .assets-compiled"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
   environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  only_if { Dir["#{node['gitlab']['app_home']}/public/assets/*"].empty? }
+  not_if { File.exist?("#{node['gitlab']['app_home']}/.assets-compiled") }
 end
 
 # Initialize database

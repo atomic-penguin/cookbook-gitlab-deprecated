@@ -4,7 +4,7 @@ license 'Apache 2.0'
 description 'Installs/Configures gitlab'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 name 'gitlab'
-version '8.14.0'
+version '8.17.0'
 issues_url 'https://github.com/atomic-penguin/cookbook-gitlab/issues'
 source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 
@@ -16,6 +16,7 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
   git
   logrotate
   ncurses
+  nodejs
   openssh
   postgresql
   readline

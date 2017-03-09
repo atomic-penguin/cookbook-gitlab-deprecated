@@ -34,12 +34,12 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'https://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '8-14-stable'
+default['gitlab']['git_branch'] = '8-17-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'https://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v4.0.2'
+default['gitlab']['shell']['git_branch'] = 'v4.1.1'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -69,6 +69,7 @@ default['gitlab']['cookbook_dependencies'] = %w(
   redisio::default
   redisio::enable
   ruby_build
+  nodejs::install
 )
 
 # Redisio instance name
@@ -79,7 +80,6 @@ default['gitlab']['packages'] = %w(
   cmake
   curl
   golang
-  nodejs
   python-docutils
   sudo
   wget
@@ -165,5 +165,5 @@ default['postgresql']['contrib']['extensions'] = ['pg_trgm']
 default['nginx']['default_site_enabled'] = false
 
 # GitLab Workhorse
-default['gitlab']['workhorse_revision'] = 'v1.0.1'
+default['gitlab']['workhorse_revision'] = 'v1.3.0'
 default['gitlab']['workhorse_repository'] = 'https://gitlab.com/gitlab-org/gitlab-workhorse.git'
