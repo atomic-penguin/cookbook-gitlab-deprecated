@@ -12,6 +12,7 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
   apt
   build-essential
   certificate
+  chef_nginx
   database
   git
   logrotate
@@ -29,7 +30,6 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 ).each do |cb_depend|
   depends cb_depend
 end
-depends 'chef_nginx', '~> 5.1'
 depends 'mysql', '~> 6.0'
 depends 'mysql2_chef_gem'
 
