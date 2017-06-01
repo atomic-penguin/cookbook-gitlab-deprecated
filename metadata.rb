@@ -31,7 +31,7 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
   depends cb_depend
 end
 depends 'mysql', '~> 6.0'
-depends 'mysql2_chef_gem'
+depends 'mysql2_chef_gem', '~> 1.0'
 
 %w(redhat centos scientific amazon debian ubuntu).each do |os|
   supports os
