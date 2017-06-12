@@ -140,6 +140,7 @@ default['gitlab']['backup_keep_time'] = 604_800
 # Ip and port nginx will be serving requests on
 default['gitlab']['listen_ip'] = '*'
 default['gitlab']['listen_port'] = nil
+default['gitlab']['listen_ipv6'] = !node['network']['ip6address'].nil?
 
 # LDAP authentication
 default['gitlab']['ldap']['enabled'] = false
