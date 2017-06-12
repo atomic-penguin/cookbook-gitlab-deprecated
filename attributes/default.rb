@@ -72,8 +72,18 @@ default['gitlab']['cookbook_dependencies'] = %w(
   nodejs::install
 )
 
-# Redisio instance name
-default['gitlab']['redis_instance'] = 'redis-server'
+# redisio instance
+default['gitlab']['redis_instance'] = 'redisgitlab'
+default['redisio']['servers'] = [
+  {
+    'name' => 'gitlab',
+    'user' => node['gitlab']['user'],
+    'group' => node['gitlab']['group'],
+    'unixsocket' => '/var/run/redis/gitlab/redis.sock',
+    'unixsocketperm' => '660',
+    'port' => 0
+  }
+]
 
 # Required packages for Gitlab
 default['gitlab']['packages'] = %w(

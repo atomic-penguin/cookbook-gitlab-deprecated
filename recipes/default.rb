@@ -42,14 +42,6 @@ end
 extend SELinuxPolicy::Helpers
 include_recipe 'selinux_policy::install' if use_selinux
 
-# Install the required packages via cookbook
-node['gitlab']['cookbook_dependencies'].each do |requirement|
-  include_recipe requirement
-end
-
-# Install required packages for Gitlab
-package node['gitlab']['packages']
-
 # Add a git user for Gitlab
 user node['gitlab']['user'] do
   comment 'Gitlab User'
@@ -57,6 +49,14 @@ user node['gitlab']['user'] do
   shell '/bin/bash'
   supports manage_home: true
 end
+
+# Install the required packages via cookbook
+node['gitlab']['cookbook_dependencies'].each do |requirement|
+  include_recipe requirement
+end
+
+# Install required packages for Gitlab
+package node['gitlab']['packages']
 
 # Fix home permissions for nginx
 directory node['gitlab']['home'] do
@@ -178,6 +178,9 @@ listen_port = \
 api_fqdn = \
   node['gitlab']['shell']['gitlab_host'] || node['gitlab']['web_fqdn']
 
+redis_socket = \
+  node['redisio']['servers'].find { |s| s['name'] == 'gitlab' }['unixsocket']
+
 # render gitlab-shell config
 template node['gitlab']['shell']['home'] + '/config.yml' do
   owner node['gitlab']['user']
@@ -186,7 +189,8 @@ template node['gitlab']['shell']['home'] + '/config.yml' do
   source 'shell_config.yml.erb'
   variables(
     fqdn: api_fqdn,
-    listen_port: listen_port
+    listen_port: listen_port,
+    redis_socket: redis_socket
   )
 end
 
@@ -231,6 +235,15 @@ template "#{node['gitlab']['app_home']}/config/database.yml" do
     username: node['gitlab']['database']['username'],
     password: node['gitlab']['database']['password']
   )
+end
+
+file "#{node['gitlab']['app_home']}/config/resque.yml" do
+  owner 'root'
+  group node['gitlab']['group']
+  mode '0640'
+  content lazy {
+    { 'production' => { 'url' => "unix:#{redis_socket}" } }.to_yaml
+  }
 end
 
 # Render gitlab config file
@@ -463,4 +476,5 @@ service 'gitlab' do
   pattern "unicorn_rails master -D -c #{node['gitlab']['app_home']}/config/unicorn.rb"
   action [:enable, :start]
   subscribes :restart, "template[#{node['gitlab']['app_home']}/config/gitlab.yml]", :delayed
+  subscribes :restart, "file[#{node['gitlab']['app_home']}/config/resque.yml]", :delayed
 end
