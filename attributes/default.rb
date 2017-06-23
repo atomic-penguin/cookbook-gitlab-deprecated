@@ -79,6 +79,7 @@ default['redisio']['servers'] = [
     'name' => 'gitlab',
     'user' => node['gitlab']['user'],
     'group' => node['gitlab']['group'],
+    'datadir' => '/var/lib/redis/gitlab',
     'unixsocket' => '/var/run/redis/gitlab/redis.sock',
     'unixsocketperm' => '660',
     'port' => 0
