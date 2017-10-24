@@ -28,7 +28,7 @@ platforms:
   #attributes:
     #apt:
     #- compile_time_update: true
-- name: centos-7.3
+- name: centos-7.4
   driver_config:
     network:
     - ["forwarded_port", {guest: 80, host: 8082}]
@@ -41,7 +41,9 @@ platforms:
 
 suites:
 - name: default
-  run_list: ["recipe[gitlab]"]
+  run_list:
+    - recipe[gitlab-test]
+    - recipe[gitlab]
   attributes:
     gitlab:
       database:
@@ -54,7 +56,9 @@ suites:
 - name: https
   data_bags_path: "test/integration/https/data_bags"
   encrypted_data_bag_secret_key_path: "test/integration/https/encrypted_data_bag_secret"
-  run_list: ["recipe[gitlab]"]
+  run_list:
+    - recipe[gitlab-test]
+    - recipe[gitlab]
   attributes:
     gitlab:
       https: true

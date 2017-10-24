@@ -34,12 +34,12 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'https://github.com/gitlabhq/gitlabhq.git'
-default['gitlab']['git_branch'] = '8-17-stable'
+default['gitlab']['git_branch'] = '10-1-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'https://github.com/gitlabhq/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v4.1.1'
+default['gitlab']['shell']['git_branch'] = 'v5.9.3'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -58,7 +58,7 @@ default['gitlab']['database']['password'] = nil
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '2.3.3'
+default['gitlab']['install_ruby'] = '2.3.5'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib
@@ -70,6 +70,7 @@ default['gitlab']['cookbook_dependencies'] = %w(
   redisio::enable
   ruby_build
   nodejs::install
+  yarn
 )
 
 # redisio instance
@@ -104,6 +105,7 @@ when 'debian'
     libgdbm-dev
     libicu-dev
     libkrb5-dev
+    libre2-dev
     libssl-dev
     libyaml-dev
     pkg-config
@@ -120,6 +122,7 @@ when 'rhel'
     libyaml-devel
     openssl-devel
     pkgconfig
+    re2-devel
   )
 end
 
@@ -160,7 +163,7 @@ default['gitlab']['ldap']['base'] = '_the_base_where_you_search_for_users'
 default['gitlab']['ldap']['port'] = 636
 default['gitlab']['ldap']['active_directory'] = true
 default['gitlab']['ldap']['uid'] = 'sAMAccountName'
-default['gitlab']['ldap']['method'] = 'ssl'
+default['gitlab']['ldap']['method'] = 'simple_tls'
 default['gitlab']['ldap']['bind_dn'] = '_the_full_dn_of_the_user_you_will_bind_with'
 default['gitlab']['ldap']['password'] = '_the_password_of_the_bind_user'
 default['gitlab']['ldap']['allow_username_or_email_login'] = true
@@ -177,5 +180,5 @@ default['postgresql']['contrib']['extensions'] = ['pg_trgm']
 default['nginx']['default_site_enabled'] = false
 
 # GitLab Workhorse
-default['gitlab']['workhorse_revision'] = 'v1.3.0'
+default['gitlab']['workhorse_revision'] = 'v3.2.0'
 default['gitlab']['workhorse_repository'] = 'https://gitlab.com/gitlab-org/gitlab-workhorse.git'

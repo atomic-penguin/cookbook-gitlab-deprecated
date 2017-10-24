@@ -1,0 +1,7 @@
+name             'gitlab-test'
+maintainer       'James Le Cuirot'
+maintainer_email 'james.le-cuirot@yakara.com'
+license          'Apache 2.0'
+description      'Test cookbook for gitlab'
+long_description 'Test cookbook for gitlab'
+version          '0.1.0'

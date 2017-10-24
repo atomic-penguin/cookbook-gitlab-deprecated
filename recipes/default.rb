@@ -359,16 +359,20 @@ end
 without_group = node['gitlab']['database']['type'] == 'mysql' ? 'postgres' : 'mysql'
 
 bundler_binary = "#{node['gitlab']['install_ruby_path']}/bin/bundle"
-bundle_success = "#{node['gitlab']['app_home']}/vendor/bundle/.success"
+
+bundler_env = {
+  'HOME' => node['gitlab']['app_home'],
+  'LANG' => 'en_US.UTF-8',
+  'LC_ALL' => 'en_US.UTF-8'
+}
 
 # Install Gems with bundle install
 execute 'gitlab-bundle-install' do
-  command "#{bundler_binary} install --deployment --binstubs --without development test #{without_group} aws && touch #{bundle_success}"
+  command "#{bundler_binary} install --deployment --binstubs --without development test #{without_group} aws"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
-  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  not_if { File.exist?(bundle_success) }
+  environment bundler_env
 end
 
 # Install GitLab Workhorse
@@ -393,22 +397,27 @@ bash 'compile-workhorse' do
   not_if { ::File.exist?("#{node['gitlab']['home']}/gitlab-workhorse/gitlab-workhorse") }
 end
 
-nodejs_npm 'gitlab' do
-  path node['gitlab']['app_home']
-  user node['gitlab']['user']
-  group node['gitlab']['group']
-  options ['--only=production']
-  json true
+yarn_install 'gitlab' do
+  dir node['gitlab']['app_home']
+
+  # Only root and vagrant can use vagrant-cachier. Files are owned by
+  # vagrant:vagrant and execute does not respect secondary groups. :(
+  if ENV['TEST_KITCHEN'].to_i == 1
+    user 'root'
+  else
+    user node['gitlab']['user']
+    user_home node['gitlab']['home']
+  end
 end
 
 # Compile assets
-execute 'gitlab-bundle-assets-compile' do
-  command "#{bundler_binary} exec rake gitlab:assets:compile RAILS_ENV=production NODE_ENV=production && touch .assets-compiled"
+execute 'gitlab-bundle-compile' do
+  command "#{bundler_binary} exec rake gettext:pack gettext:po_to_json gitlab:assets:compile RAILS_ENV=production NODE_ENV=production && touch .gitlab-compiled"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
-  environment('LANG' => 'en_US.UTF-8', 'LC_ALL' => 'en_US.UTF-8')
-  not_if { File.exist?("#{node['gitlab']['app_home']}/.assets-compiled") }
+  environment bundler_env
+  not_if { File.exist?("#{node['gitlab']['app_home']}/.gitlab-compiled") }
 end
 
 # Initialize database
@@ -421,6 +430,7 @@ execute 'gitlab-bundle-rake' do
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
+  environment bundler_env
   not_if { File.exist?("#{node['gitlab']['app_home']}/.gitlab-setup") }
 end
 
