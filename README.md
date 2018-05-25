@@ -5,7 +5,7 @@
 This cookbook will deploy gitlab; a free project and repository management
 application.
 
-Gitlab code hosted on github [here](https://github.com/gitlabhq/gitlabhq).
+Gitlab code is hosted [here](https://gitlab.com/gitlab-org/gitlab-ce).
 
 ## Important changes
 
@@ -74,7 +74,7 @@ Attributes
   - Gitlab email from, default `gitlab@ + node.fqdn`
 
 * `gitlab['git_url']`
-  - Github gitlab address, default https://github.com/gitlabhq/gitlabhq.git
+  - Gitlab repository address, default https://gitlab.com/gitlab-org/gitlab-ce.git
 
 * `gitlab['git_branch']`
   - Defaults to stable GitlabHQ branch matching the major version of this cookbook. e.g. 6.1.x => 6-1-stable
