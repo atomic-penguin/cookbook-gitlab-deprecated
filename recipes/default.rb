@@ -162,9 +162,19 @@ end
 git node['gitlab']['shell']['home'] do
   repository node['gitlab']['shell']['git_url']
   revision node['gitlab']['shell']['git_branch']
-  action :checkout
+  action :sync
   user node['gitlab']['user']
   group node['gitlab']['group']
+  notifies :run, 'bash[compile-shell]', :immediately
+end
+
+bash 'compile-shell' do
+  action :run
+  cwd node['gitlab']['shell']['home']
+  code "#{node['gitlab']['install_ruby_path']}/bin/ruby ./bin/compile"
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  not_if { ::File.exist?("#{node['gitlab']['shell']['home']}/bin/gitaly-receive-pack") }
 end
 
 # Either listen_port has been configured elsewhere or we calculate it
@@ -206,16 +216,18 @@ end
 # Render gitlab init script
 # This needs to happen before gitlab.yml is rendered.
 # So when the service is subscribed, the init file will be in place
-template '/etc/init.d/gitlab' do
+file '/etc/init.d/gitlab' do
   owner 'root'
   group 'root'
   mode '0755'
-  source 'gitlab.init.erb'
-  variables(
-    gitlab_home: node['gitlab']['home'],
-    gitlab_app_home: node['gitlab']['app_home'],
-    gitlab_user: node['gitlab']['user'],
-    gitlab_redis_instance: node['gitlab']['redis_instance']
+  content(
+    lazy do
+      File.read("#{node['gitlab']['app_home']}/lib/support/init.d/gitlab").tap do |data|
+        data.sub!(/(?<=# Required-Start:)(.*)\bredis-server\b/, '\1' + node['gitlab']['redis_instance'])
+        data.sub!(/^(\s*app_user=).*/, '\1' + Shellwords.escape(node['gitlab']['user']))
+        data.sub!(/^(\s*app_root=).*/, '\1' + Shellwords.escape(node['gitlab']['app_home']))
+      end
+    end
   )
 end
 
@@ -256,6 +268,7 @@ template "#{node['gitlab']['app_home']}/config/gitlab.yml" do
     https_boolean: node['gitlab']['https'],
     git_user: node['gitlab']['user'],
     git_home: node['gitlab']['home'],
+    git_app_home: node['gitlab']['app_home'],
     backup_path: node['gitlab']['backup_path'],
     backup_keep_time: node['gitlab']['backup_keep_time'],
     listen_port: listen_port
@@ -269,13 +282,23 @@ cookbook_file "#{node['gitlab']['app_home']}/config/initializers/rack_attack.rb"
   mode '0644'
 end
 
-# create log, tmp, pids and sockets directory
-%w(log tmp tmp/pids tmp/sockets public/uploads).each do |dir|
+# Create some world-readable directories
+%w(log tmp tmp/pids tmp/sockets public).each do |dir|
   directory File.join(node['gitlab']['app_home'], dir) do
     user node['gitlab']['user']
     group node['gitlab']['group']
     mode '0755'
     recursive true
+    action :create
+  end
+end
+
+# Create some restricted directories
+%w(tmp/sockets/private public/uploads).each do |dir|
+  directory File.join(node['gitlab']['app_home'], dir) do
+    user node['gitlab']['user']
+    group node['gitlab']['group']
+    mode '0700'
     action :create
   end
 end
@@ -358,9 +381,8 @@ end
 
 without_group = node['gitlab']['database']['type'] == 'mysql' ? 'postgres' : 'mysql'
 
-bundler_binary = "#{node['gitlab']['install_ruby_path']}/bin/bundle"
-
 bundler_env = {
+  'PATH' => "#{node['gitlab']['install_ruby_path']}/bin:#{ENV['PATH']}",
   'HOME' => node['gitlab']['app_home'],
   'LANG' => 'en_US.UTF-8',
   'LC_ALL' => 'en_US.UTF-8'
@@ -368,7 +390,7 @@ bundler_env = {
 
 # Install Gems with bundle install
 execute 'gitlab-bundle-install' do
-  command "#{bundler_binary} install --deployment --binstubs --without development test #{without_group} aws"
+  command "bundle install --deployment --binstubs --without development test #{without_group} aws"
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
@@ -412,7 +434,7 @@ end
 
 # Compile assets
 execute 'gitlab-bundle-compile' do
-  command "#{bundler_binary} exec rake gettext:pack gettext:po_to_json gitlab:assets:compile RAILS_ENV=production NODE_ENV=production && touch .gitlab-compiled"
+  command 'bundle exec rake gettext:pack gettext:po_to_json gitlab:assets:compile RAILS_ENV=production NODE_ENV=production && touch .gitlab-compiled'
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
@@ -426,12 +448,44 @@ execute 'gitlab-bundle-rake' do
   # gitlab:setup because db:reset DROPs the database and we don't want
   # to give the database user permission to create new databases.
   # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/tasks/gitlab/setup.rake
-  command "#{bundler_binary} exec rake db:schema:load add_limits_mysql setup_postgresql db:seed_fu RAILS_ENV=production && touch .gitlab-setup"
+  command 'bundle exec rake db:schema:load add_limits_mysql setup_postgresql db:seed_fu RAILS_ENV=production && touch .gitlab-setup'
   cwd node['gitlab']['app_home']
   user node['gitlab']['user']
   group node['gitlab']['group']
   environment bundler_env
   not_if { File.exist?("#{node['gitlab']['app_home']}/.gitlab-setup") }
+end
+
+# Install Gitaly
+git "#{node['gitlab']['home']}/gitaly" do
+  repository node['gitlab']['gitaly_repository']
+  revision node['gitlab']['gitaly_revision']
+  action :sync
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  notifies :run, 'bash[compile-gitaly]', :immediately
+end
+
+bash 'compile-gitaly' do
+  action :run
+  cwd "#{node['gitlab']['home']}/gitaly"
+  code 'make'
+  user node['gitlab']['user']
+  group node['gitlab']['group']
+  environment bundler_env
+  not_if { ::File.exist?("#{node['gitlab']['home']}/gitaly/gitaly") }
+end
+
+# Render Gitaly config file
+template "#{node['gitlab']['home']}/gitaly/config.toml" do
+  owner node['gitlab']['user']
+  group node['gitlab']['group']
+  mode '0644'
+  source 'gitaly.toml.erb'
+  variables(
+    git_home: node['gitlab']['home'],
+    git_app_home: node['gitlab']['app_home']
+  )
 end
 
 # Use certificate cookbook for keys.

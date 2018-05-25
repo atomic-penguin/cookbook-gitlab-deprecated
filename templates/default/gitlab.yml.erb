@@ -145,12 +145,57 @@ production: &base
     enabled: true
     # The location where build artifacts are stored (default: shared/artifacts).
     # path: shared/artifacts
+    # object_store:
+    #   enabled: false
+    #   remote_directory: artifacts # The bucket name
+    #   background_upload: false # Temporary option to limit automatic upload (Default: true)
+    #   proxy_download: false # Passthrough all downloads via GitLab instead of using Redirects to Object Storage
+    #   connection:
+    #     provider: AWS # Only AWS supported at the moment
+    #     aws_access_key_id: AWS_ACCESS_KEY_ID
+    #     aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+    #     region: us-east-1
 
   ## Git LFS
   lfs:
     enabled: true
     # The location where LFS objects are stored (default: shared/lfs-objects).
     # storage_path: shared/lfs-objects
+    object_store:
+      enabled: false
+      remote_directory: lfs-objects # Bucket name
+      # direct_upload: false # Use Object Storage directly for uploads instead of background uploads if enabled (Default: false)
+      # background_upload: false # Temporary option to limit automatic upload (Default: true)
+      # proxy_download: false # Passthrough all downloads via GitLab instead of using Redirects to Object Storage
+      connection:
+        provider: AWS
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
+        # Use the following options to configure an AWS compatible host
+        # host: 'localhost' # default: s3.amazonaws.com
+        # endpoint: 'http://127.0.0.1:9000' # default: nil
+        # path_style: true # Use 'host/bucket_name/object' instead of 'bucket_name.host/object'
+
+  ## Uploads (attachments, avatars, etc...)
+  uploads:
+    # The location where uploads objects are stored (default: public/).
+    # storage_path: public/
+    # base_dir: uploads/-/system
+    object_store:
+      enabled: false
+      remote_directory: uploads # Bucket name
+      # direct_upload: false # Use Object Storage directly for uploads instead of background uploads if enabled (Default: false)
+      # background_upload: false # Temporary option to limit automatic upload (Default: true)
+      # proxy_download: false # Passthrough all downloads via GitLab instead of using Redirects to Object Storage
+      connection:
+        provider: AWS
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
+        # host: 'localhost' # default: s3.amazonaws.com
+        # endpoint: 'http://127.0.0.1:9000' # default: nil
+        # path_style: true # Use 'host/bucket_name/object' instead of 'bucket_name.host/object'
 
   ## GitLab Pages
   pages:
@@ -167,6 +212,8 @@ production: &base
     artifacts_server: true
     # external_http: ["1.1.1.1:80", "[2001::1]:80"] # If defined, enables custom domain support in GitLab Pages
     # external_https: ["1.1.1.1:443", "[2001::1]:443"] # If defined, enables custom domain and certificate support in GitLab Pages
+    admin:
+      address: unix:<%= @git_app_home %>/tmp/sockets/private/pages-admin.socket # TCP connections are supported too (e.g. tcp://host:port)
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -175,14 +222,20 @@ production: &base
     host: 'https://mattermost.example.com'
 
   ## Gravatar
-  ## For Libravatar see: http://doc.gitlab.com/ce/customization/libravatar.html
+  ## If using gravatar.com, there's nothing to change here. For Libravatar
+  ## you'll need to provide the custom URLs. For more information,
+  ## see: https://docs.gitlab.com/ee/customization/libravatar.html
   gravatar:
-    # gravatar urls: possible placeholders: %{hash} %{size} %{email} %{username}
-    # plain_url: "http://..."     # default: http://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
+    # Gravatar/Libravatar URLs: possible placeholders: %{hash} %{size} %{email} %{username}
+    # plain_url: "http://..."     # default: https://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
     # ssl_url:   "https://..."    # default: https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
 
+  ## Sidekiq
+  sidekiq:
+    log_format: default # (json is also supported)
+
   ## Auxiliary jobs
-  # Periodically executed jobs, to self-heal Gitlab, do external synchronizations, etc.
+  # Periodically executed jobs, to self-heal GitLab, do external synchronizations, etc.
   # Please read here for more information: https://github.com/ondrejbartas/sidekiq-cron#adding-cron-job
   cron_jobs:
     # Flag stuck CI jobs as failed
@@ -205,6 +258,10 @@ production: &base
     # Remove outdated repository archives
     repository_archive_cache_worker:
       cron: "0 * * * *"
+
+    # Verify custom GitLab Pages domains
+    pages_domain_verification_cron_worker:
+      cron: "*/15 * * * *"
 
   registry:
     # enabled: true
@@ -358,6 +415,9 @@ production: &base
           first_name: 'givenName'
           last_name:  'sn'
 
+        # If lowercase_usernames is enabled, GitLab will lower case the username.
+        lowercase_usernames: false
+
       # GitLab EE only: add more LDAP servers
       # Choose an ID made of a-z and 0-9 . This ID will be stored in the database
       # so that GitLab can remember which LDAP server a user belongs to.
@@ -379,6 +439,7 @@ production: &base
     # Sync user's profile from the specified Omniauth providers every time the user logs in (default: empty).
     # Define the allowed providers using an array, e.g. ["cas3", "saml", "twitter"],
     # or as true/false to allow all providers or none.
+    # When authenticating using LDAP, the user's email is always synced.
     # sync_profile_from_provider: []
 
     # Select which info to sync from the providers above. (default: email).
@@ -461,7 +522,17 @@ production: &base
       # - { name: 'twitter',
       #     app_id: 'YOUR_APP_ID',
       #     app_secret: 'YOUR_APP_SECRET' }
-      #
+      # - { name: 'jwt',
+      #     app_secret: 'YOUR_APP_SECRET',
+      #     args: {
+      #             algorithm: 'HS256',
+      #             uid_claim: 'email',
+      #             required_claims: ["name", "email"],
+      #             info_map: { name: "name", email: "email" },
+      #             auth_url: 'https://example.com/',
+      #             valid_within: null,
+      #           }
+      #   }
       # - { name: 'saml',
       #     label: 'Our SAML Provider',
       #     groups_attribute: 'Groups',
@@ -516,13 +587,8 @@ production: &base
     storages: # You must have at least a `default` storage path.
       default:
         path: <%= @git_home %>/repositories
-        gitaly_address: unix:<%= @git_home %>/gitlab/tmp/sockets/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
+        gitaly_address: unix:<%= @git_app_home %>/tmp/sockets/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
         # gitaly_token: 'special token' # Optional: override global gitaly.token for this storage.
-        failure_count_threshold: 10 # number of failures before stopping attempts
-        failure_wait_time: 30 # Seconds after an access failure before allowing access again
-        failure_reset_time: 1800 # Time in seconds to expire failures
-        storage_timeout: 30 # Time in seconds to wait before aborting a storage access attempt
-
 
   ## Backup settings
   backup:
@@ -554,14 +620,14 @@ production: &base
 
     # File that contains the secret key for verifying access for gitlab-shell.
     # Default is '.gitlab_shell_secret' relative to Rails.root (i.e. root of the GitLab app).
-    # secret_file: <%= @git_home %>/gitlab/.gitlab_shell_secret
+    # secret_file: <%= @git_app_home %>/.gitlab_shell_secret
 
     # Git over HTTP
     upload_pack: true
     receive_pack: true
 
-    # Git import/fetch timeout
-    # git_timeout: 800
+    # Git import/fetch timeout, in seconds. Defaults to 3 hours.
+    # git_timeout: 10800
 
     # If you use non-standard ssh port you need to specify it
     # ssh_port: 22
@@ -569,13 +635,13 @@ production: &base
   workhorse:
     # File that contains the secret key for verifying access for gitlab-workhorse.
     # Default is '.gitlab_workhorse_secret' relative to Rails.root (i.e. root of the GitLab app).
-    # secret_file: <%= @git_home %>/gitlab/.gitlab_workhorse_secret
+    # secret_file: <%= @git_app_home %>/.gitlab_workhorse_secret
 
   ## Git settings
   # CAUTION!
   # Use the default values unless you really know what you are doing
   git:
-    bin_path: /usr/bin/git
+    bin_path: git
 
   ## Webpack settings
   # If enabled, this will tell rails to serve frontend assets from the webpack-dev-server running
@@ -640,6 +706,39 @@ test:
     enabled: true
   lfs:
     enabled: false
+    # The location where LFS objects are stored (default: shared/lfs-objects).
+    # storage_path: shared/lfs-objects
+    object_store:
+      enabled: false
+      remote_directory: lfs-objects # The bucket name
+      connection:
+        provider: AWS # Only AWS supported at the moment
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
+  artifacts:
+    path: tmp/tests/artifacts
+    enabled: true
+    # The location where build artifacts are stored (default: shared/artifacts).
+    # path: shared/artifacts
+    object_store:
+      enabled: false
+      remote_directory: artifacts # The bucket name
+      background_upload: false
+      connection:
+        provider: AWS # Only AWS supported at the moment
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
+  uploads:
+    storage_path: tmp/tests/public
+    object_store:
+      enabled: false
+      connection:
+        provider: AWS # Only AWS supported at the moment
+        aws_access_key_id: AWS_ACCESS_KEY_ID
+        aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: us-east-1
   gitlab:
     host: localhost
     port: 80
@@ -655,9 +754,6 @@ test:
       default:
         path: tmp/tests/repositories/
         gitaly_address: unix:tmp/tests/gitaly/gitaly.socket
-        failure_count_threshold: 999999
-        failure_wait_time: 0
-        storage_timeout: 30
       broken:
         path: tmp/tests/non-existent-repositories
         gitaly_address: unix:tmp/tests/gitaly/gitaly.socket
@@ -717,6 +813,17 @@ test:
       - { name: 'twitter',
           app_id: 'YOUR_APP_ID',
           app_secret: 'YOUR_APP_SECRET' }
+      - { name: 'jwt',
+          app_secret: 'YOUR_APP_SECRET',
+          args: {
+                  algorithm: 'HS256',
+                  uid_claim: 'email',
+                  required_claims: ["name", "email"],
+                  info_map: { name: "name", email: "email" },
+                  auth_url: 'https://example.com/',
+                  valid_within: null,
+                }
+        }
       - { name: 'auth0',
           args: {
             client_id: 'YOUR_AUTH0_CLIENT_ID',

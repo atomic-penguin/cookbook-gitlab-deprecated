@@ -22,7 +22,7 @@
 default['gitlab']['user'] = 'git'
 default['gitlab']['group'] = 'git'
 default['gitlab']['home'] = '/srv/git'
-default['gitlab']['app_home'] = default['gitlab']['home'] + '/gitlab'
+default['gitlab']['app_home'] = node['gitlab']['home'] + '/gitlab'
 default['gitlab']['web_fqdn'] = node['fqdn']
 default['gitlab']['nginx_server_names'] = ['gitlab.*', node['fqdn']]
 default['gitlab']['email_from'] = "gitlab@#{node['domain']}"
@@ -34,12 +34,12 @@ default['gitlab']['username_changing_enabled'] = true
 
 # Set github URL for gitlab
 default['gitlab']['git_url'] = 'https://gitlab.com/gitlab-org/gitlab-ce.git'
-default['gitlab']['git_branch'] = '10-1-stable'
+default['gitlab']['git_branch'] = '10-8-stable'
 
 # gitlab-shell attributes
 default['gitlab']['shell']['home'] = node['gitlab']['home'] + '/gitlab-shell'
 default['gitlab']['shell']['git_url'] = 'https://gitlab.com/gitlab-org/gitlab-shell.git'
-default['gitlab']['shell']['git_branch'] = 'v5.9.3'
+default['gitlab']['shell']['git_branch'] = 'v7.1.2'
 default['gitlab']['shell']['gitlab_host'] = nil
 
 # Database setup
@@ -58,7 +58,7 @@ default['gitlab']['database']['password'] = nil
 # Ruby setup
 include_attribute 'ruby_build'
 default['ruby_build']['upgrade'] = 'sync'
-default['gitlab']['install_ruby'] = '2.3.5'
+default['gitlab']['install_ruby'] = '2.3.7'
 default['gitlab']['install_ruby_path'] = node['gitlab']['home']
 default['gitlab']['cookbook_dependencies'] = %w(
   zlib
@@ -126,13 +126,13 @@ when 'rhel'
   )
 end
 
-# How to install git? RHEL 7 can use End Point.
+# How to install git?
 default['gitlab']['git_recipe'] = value_for_platform(
-  %w( redhat centos scientific oracle ) => { '< 7' => 'source' },
+  %w( redhat centos scientific oracle ) => { '< 8' => 'source' },
   'amazon' => { '>= 0' => 'source' },
-  'fedora' => { '< 24' => 'source' },
+  'fedora' => { '< 25' => 'source' },
   'debian' => { '< 9' => 'source' },
-  'ubuntu' => { '< 16.04' => 'source' },
+  'ubuntu' => { '< 17.04' => 'source' },
   'default' => 'package'
 )
 
@@ -181,5 +181,9 @@ default['postgresql']['pg_gem']['version'] = '0.21.0' # https://github.com/sous-
 default['nginx']['default_site_enabled'] = false
 
 # GitLab Workhorse
-default['gitlab']['workhorse_revision'] = 'v3.2.0'
+default['gitlab']['workhorse_revision'] = 'v4.2.0'
 default['gitlab']['workhorse_repository'] = 'https://gitlab.com/gitlab-org/gitlab-workhorse.git'
+
+# Gitaly
+default['gitlab']['gitaly_revision'] = 'v0.100.1'
+default['gitlab']['gitaly_repository'] = 'https://gitlab.com/gitlab-org/gitaly.git'

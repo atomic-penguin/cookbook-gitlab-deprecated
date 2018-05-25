@@ -2,7 +2,7 @@
 # Cookbook Name:: gitlab
 # Recipe:: git
 #
-# Copyright 2016, Yakara Ltd
+# Copyright 2018, Yakara Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,4 @@
 #
 
 git_recipe = node['gitlab']['git_recipe']
-
-yum_repository 'endpoint-git' do
-  description 'git from End Point repository'
-  includepkgs 'git git-core* perl-Git'
-  el = node['platform_version'].to_i
-  baseurl "https://packages.endpoint.com/rhel/#{el}/os/$basearch/"
-  gpgkey "https://packages.endpoint.com/endpoint-rpmsign-#{el}.pub"
-  only_if { git_recipe == 'package' && platform_family?('rhel') }
-end
-
 include_recipe "git::#{git_recipe}"
