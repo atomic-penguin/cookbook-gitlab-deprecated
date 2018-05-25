@@ -23,7 +23,6 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
   readline
   redisio
   ruby_build
-  selinux_policy
   xml
   yarn
   yum-epel
@@ -33,6 +32,7 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 end
 depends 'mysql', '~> 6.0'
 depends 'mysql2_chef_gem', '~> 1.0'
+depends 'selinux_policy', '>= 2.1.0'
 
 %w(redhat centos scientific amazon debian ubuntu).each do |os|
   supports os
