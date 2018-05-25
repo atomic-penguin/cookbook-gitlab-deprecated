@@ -19,7 +19,6 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
   ncurses
   nodejs
   openssh
-  postgresql
   readline
   redisio
   ruby_build
@@ -32,6 +31,7 @@ source_url 'https://github.com/atomic-penguin/cookbook-gitlab'
 end
 depends 'mysql', '~> 6.0'
 depends 'mysql2_chef_gem', '~> 1.0'
+depends 'postgresql', '~> 6.0'
 depends 'selinux_policy', '>= 2.1.0'
 
 %w(redhat centos scientific amazon debian ubuntu).each do |os|

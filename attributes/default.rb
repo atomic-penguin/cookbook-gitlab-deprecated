@@ -175,6 +175,7 @@ default['build-essential']['compile_time'] = true # needed for mysql chef_gem
 
 # PostgreSQL
 default['postgresql']['contrib']['extensions'] = ['pg_trgm']
+default['postgresql']['pg_gem']['version'] = '0.21.0' # https://github.com/sous-chefs/postgresql/issues/480
 
 # nginx
 default['nginx']['default_site_enabled'] = false
